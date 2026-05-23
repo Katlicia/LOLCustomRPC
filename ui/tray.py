@@ -2,12 +2,9 @@
 System Tray integration using pystray + Pillow.
 
 Menu:
-  LoL RPC Custom (title, disabled)
-  ─────────────
+  LoLCustomRPC (title, disabled)
   Open Settings
-  ─────────────
   Pause RPC  /  Resume RPC  (toggle)
-  ─────────────
   Quit
 
 Double-clicking the icon opens Settings.
@@ -27,7 +24,7 @@ logger = logging.getLogger(__name__)
 def _make_icon_image(color: str = "#5865f2", size: int = 64) -> Image.Image:
     """
     Generate a simple tinted circular icon.
-    In production this would load a proper .ico asset from assets/.
+    In production this will load a proper .ico asset from assets/.
     """
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -58,16 +55,13 @@ class TrayIcon:
         self._icon: Optional[pystray.Icon] = None
         self._thread: Optional[threading.Thread] = None
 
-    # ------------------------------------------------------------------
     # Lifecycle
-    # ------------------------------------------------------------------
-
     def start(self):
         """Start the tray icon in a daemon thread."""
         self._icon = pystray.Icon(
             name="lol-rpc-custom",
             icon=_make_icon_image(),
-            title="LoL RPC Custom",
+            title="LoLCustomRPC",
             menu=self._build_menu(),
         )
         # Double-click opens settings
@@ -81,13 +75,10 @@ class TrayIcon:
         if self._icon:
             self._icon.stop()
 
-    # ------------------------------------------------------------------
     # Menu
-    # ------------------------------------------------------------------
-
     def _build_menu(self) -> Menu:
         return Menu(
-            item("LoL RPC Custom", lambda: None, enabled=False),
+            item("LoLCustomRPC", lambda: None, enabled=False),
             Menu.SEPARATOR,
             item("Open Settings", lambda: self._open_settings()),
             Menu.SEPARATOR,
@@ -106,10 +97,7 @@ class TrayIcon:
             self._icon.menu = self._build_menu()
             self._icon.update_menu()
 
-    # ------------------------------------------------------------------
     # Actions
-    # ------------------------------------------------------------------
-
     def _open_settings(self):
         # pystray runs on a non-main thread; use after() to stay thread-safe
         self._on_open_settings()
@@ -126,10 +114,7 @@ class TrayIcon:
         self.stop()
         self._on_quit()
 
-    # ------------------------------------------------------------------
     # Public state helpers
-    # ------------------------------------------------------------------
-
     @property
     def is_paused(self) -> bool:
         return self._paused
