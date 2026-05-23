@@ -72,6 +72,7 @@ class Translator:
         """
         self._configured_locale: str = locale
         self._active_locale: str = DEFAULT_LOCALE
+        self._auto_locale: str = DEFAULT_LOCALE  # last locale detected from LCU
         self._strings: Dict[str, str] = {}
         self._fallback_strings: Dict[str, str] = {}
         self._load_fallback()
@@ -98,7 +99,7 @@ class Translator:
             return False
         locale_lower = locale.lower()
 
-        # Convert from LoL format if needed
+        # Convert from LoL format if needed (en_GB -> en)
         if locale_lower in LOL_LOCALE_MAP:
             locale_lower = LOL_LOCALE_MAP[locale_lower]
 
@@ -133,10 +134,16 @@ class Translator:
         if not lol_locale:
             return
         self.set_locale(lol_locale)
+        self._auto_locale = self._active_locale  # remember for UI "auto" revert
 
     @property
     def active_locale(self) -> str:
         return self._active_locale
+
+    @property
+    def auto_locale(self) -> str:
+        """Last locale resolved from the LoL client (used by UI to revert to 'auto')."""
+        return self._auto_locale
 
     def t(self, key: str, **kwargs) -> str:
         """
