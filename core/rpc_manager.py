@@ -1,10 +1,10 @@
 """
 Discord RPC Manager.
-- connects with pypresence
-- automatic reconnect (if Discord closes or network drops)
-- diff check: does not resend identical payloads
-- rate limit protection
-- force resync: resends the last payload after reconnect
+- Connects to Discord via pypresence
+- Auto-reconnect when Discord closes/reopens or pipe drops
+- Diff check: skips sending identical payloads back-to-back
+- Rate-limit guard: minimum interval between updates
+- Force resync: re-sends the last payload after reconnect and on a periodic timer
 """
 
 import time
@@ -19,9 +19,7 @@ from .state_machine import RPCPayload
 logger = logging.getLogger(__name__)
 
 MIN_UPDATE_INTERVAL = 2.0
-RECONNECT_DELAY = 5.0 
-# Periodic resync: force update at regular intervals even if Discord appears connected
-# This helps detect if Discord went unsynced in the background for any reason.
+RECONNECT_DELAY = 5.0
 PERIODIC_RESYNC_INTERVAL = 60.0
 
 
@@ -40,22 +38,21 @@ class RPCManager:
     def connect(self) -> bool:
         if self.connected:
             return True
+        logger.info("Connecting to Discord...")
         try:
             self.rpc = Presence(self.client_id)
             self.rpc.connect()
             self.connected = True
-            # NEW: new connection = reset state, force resend last payload on next tick
             self.last_signature = ()
             self.last_update_time = 0
             self._consecutive_failures = 0
             logger.info("Connected to Discord.")
-            # If there is a last payload, resend it immediately (resync)
             if self.last_payload:
-                logger.info("Resending last payload after reconnect...")
+                logger.info("Resyncing last payload after reconnect...")
                 self._send_update(self.last_payload, force=True)
             return True
         except DiscordNotFound:
-            logger.debug("Discord is not open.")
+            logger.debug("Discord is not running.")
             self.connected = False
             return False
         except (InvalidID, InvalidPipe) as e:
@@ -68,6 +65,7 @@ class RPCManager:
             return False
 
     def disconnect(self):
+        logger.debug("Disconnecting from Discord.")
         if self.rpc and self.connected:
             try:
                 self.rpc.close()
@@ -80,64 +78,56 @@ class RPCManager:
         now = time.time()
         if (now - self.last_reconnect_attempt) < RECONNECT_DELAY:
             return False
+        logger.info("Attempting reconnect to Discord...")
         self.last_reconnect_attempt = now
         self.disconnect()
         return self.connect()
 
     def force_resync(self):
-        """
-        Periodic force resync - resend the last payload even if Discord appears connected.
-        This helps recover from hidden unsyncs or transient network glitches.
-        """
+        """Periodic resync — re-sends the last payload even if nothing changed."""
         if self.connected and self.last_payload:
-            logger.debug("Periodic force resync.")
+            logger.debug("Periodic force resync: re-sending last payload.")
             self._send_update(self.last_payload, force=True)
             self.last_resync_time = time.time()
 
     def update(self, payload: Optional[RPCPayload]) -> bool:
         """
-        Send the payload to Discord.
-        - None: clear the RPC (LoL closed)
-        - skip if the same payload was already sent (diff check)
-        - respect rate limits
-        - if reconnect happened, force resend
+        Send a payload to Discord.
+        - None: clear RPC (LoL is closed)
+        - Identical payload: skip (diff check)
+        - Too soon: skip (rate limit)
         """
         if not self.connected:
             if not self.try_reconnect():
                 return False
 
-        # Periodic resync check
         now = time.time()
         if (now - self.last_resync_time) >= PERIODIC_RESYNC_INTERVAL:
             if self.last_payload and payload is not None:
-                # reset last_signature so this update is forced
                 self.last_signature = ()
                 self.last_resync_time = now
 
-        # If payload is None, clear the RPC
         if payload is None:
-            self.last_payload = None  # clear cache
+            self.last_payload = None
             if self.last_signature:
                 try:
                     self.rpc.clear()
                     self.last_signature = ()
-                    logger.info("RPC cleared.")
+                    logger.info("RPC cleared (LoL closed).")
                     self._consecutive_failures = 0
                     return True
                 except (PipeClosed, BrokenPipeError, ConnectionResetError, OSError):
                     self._on_failure()
                     return False
                 except Exception as e:
-                    logger.warning(f"RPC clear error: {e}")
+                    logger.warning(f"RPC clear failed: {e}")
                     return False
             return True
 
-        # Diff check
         signature = payload.compute_signature()
         if signature == self.last_signature:
             return True
 
-        # Rate limit
         if (now - self.last_update_time) < MIN_UPDATE_INTERVAL:
             return False
 
@@ -152,26 +142,26 @@ class RPCManager:
         try:
             self.rpc.update(**kwargs)
             self.last_signature = payload.compute_signature()
-            self.last_payload = payload  # NEW: cache it
+            self.last_payload = payload
             self.last_update_time = time.time()
             self._consecutive_failures = 0
             tag = "[FORCE]" if force else f"[{payload.state_name.value}]"
-            logger.info(f"{tag} {payload.details} | {payload.state}")
+            logger.info(f"{tag} Payload sent — details: {payload.details!r} | state: {payload.state!r}")
             return True
         except (PipeClosed, BrokenPipeError, ConnectionResetError, OSError) as e:
-            logger.warning(f"Discord pipe closed ({type(e).__name__}), reconnect will be attempted.")
+            logger.warning(f"Discord pipe lost ({type(e).__name__}), will reconnect on next tick.")
             self._on_failure()
             return False
         except Exception as e:
-            logger.error(f"RPC update error: {e}")
+            logger.error(f"RPC update failed: {e}")
             self._on_failure()
             return False
 
     def _on_failure(self):
-        """Mark the connection as dead on failure."""
+        """Mark connection as dead; keep last_payload so we can resync after reconnect."""
         self._consecutive_failures += 1
+        logger.warning(f"Discord connection lost (failure #{self._consecutive_failures}).")
         self.connected = False
-        # keep last_payload so it can be resent after reconnect
 
     @staticmethod
     def _payload_to_kwargs(payload: RPCPayload) -> dict:
