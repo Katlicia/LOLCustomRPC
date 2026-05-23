@@ -1,9 +1,9 @@
 """
-LoL RPC Custom - Entry point.
+LoLCustomRPC - Entry point.
 
 Startup behaviour:
-  - python main.py              → window visible (dev mode / double-click exe)
-  - python main.py --minimized  → tray only  (injected by Windows autostart registry)
+  - python main.py              -> window visible (dev mode / double-click exe)
+  - python main.py --minimized  -> tray only (injected by Windows autostart registry)
 """
 
 import os
@@ -24,9 +24,8 @@ from core.ddragon import DDragon
 from i18n.translator import Translator
 from services.config import ConfigManager
 from services import autostart
-from ui.api import API
-from ui.window import WebWindow
 from ui.tray import TrayIcon
+from ui.settings_window import SettingsWindow
 
 load_dotenv()
 
@@ -53,35 +52,53 @@ def setup_logging():
     logging.getLogger("requests").setLevel(logging.WARNING)
 
 
-# ---------------------------------------------------------------------------
 # RPC loop (background thread)
-# ---------------------------------------------------------------------------
-
 def rpc_loop(
     sm: StateMachine,
     rpc: RPCManager,
     tray: TrayIcon,
     stop_event: threading.Event,
+    win_ref: list,
 ):
     logger = logging.getLogger("rpc_loop")
     current_state = State.OFFLINE
     last_health = 0.0
+    last_lol_connected = False
+    last_discord_connected = False
 
     while not stop_event.is_set():
         try:
             now = time.time()
             if now - last_health >= 30:
                 if not rpc.connected:
-                    logger.info("Discord disconnected, reconnecting...")
+                    logger.info("Discord not connected — attempting reconnect.")
                     rpc.try_reconnect()
                 last_health = now
 
+            payload = None
             if not tray.is_paused:
                 payload = sm.build_payload()
                 current_state = payload.state_name if payload else State.OFFLINE
                 rpc.update(payload)
 
-            tray.set_connected(rpc.connected)
+            lol_connected = payload is not None
+            discord_connected = rpc.connected
+
+            tray.set_connected(discord_connected)
+
+            if win_ref:
+                win = win_ref[0]
+                if lol_connected != last_lol_connected:
+                    status = lol_connected
+                    win.after(0, lambda s=status: win.set_lol_status(s))
+                    logger.info(f"LoL status: {'connected' if lol_connected else 'disconnected'}.")
+                if discord_connected != last_discord_connected:
+                    status = discord_connected
+                    win.after(0, lambda s=status: win.set_discord_status(s))
+                    logger.info(f"Discord status: {'connected' if discord_connected else 'disconnected'}.")
+
+            last_lol_connected = lol_connected
+            last_discord_connected = discord_connected
 
         except Exception as e:
             logger.exception(f"Loop error: {e}")
@@ -92,10 +109,7 @@ def rpc_loop(
     logger.info("RPC loop stopped.")
 
 
-# ---------------------------------------------------------------------------
 # Main
-# ---------------------------------------------------------------------------
-
 def main():
     setup_logging()
     logger = logging.getLogger("main")
@@ -107,6 +121,8 @@ def main():
         )
         sys.exit(1)
 
+    # --minimized is injected by the registry autostart entry
+    # When the user double-clicks the exe directly, this flag is absent
     launched_by_autostart = "--minimized" in sys.argv
 
     # Config
@@ -114,15 +130,18 @@ def main():
     autostart.sync(config.get("general.autostart", True))
     config.on_save(lambda: autostart.sync(config.get("general.autostart", True)))
 
-    # Core
+    # Core components
     ddragon    = DDragon()
     translator = Translator(locale=config.get("general.language", "auto"))
     sm = StateMachine(
         ddragon, translator,
         options=DisplayOptions(
             show_nick=config.get("display.show_nick", True),
-            show_tag=config.get("display.show_tag", True),
+            show_tag=config.get("display.show_tag",  True),
             show_rank=config.get("display.show_rank", True),
+            show_level=config.get("display.show_level", True),
+            show_kda=config.get("display.show_kda", True),
+            logo=config.get("display.logo", "lol_logo"),
         ),
     )
 
@@ -133,39 +152,53 @@ def main():
     logger.info(f"Starting — locale: {translator.active_locale}")
 
     stop_event = threading.Event()
+    win_ref: list[SettingsWindow] = []
 
-    # PyWebView API + window
-    api = API(config=config, state_machine=sm)
-    web = WebWindow(api=api, on_closed=lambda: stop_event.set())
-
-    # Tray
-    def open_window():
-        web.show()
+    def open_settings():
+        if win_ref:
+            win_ref[0].after(0, win_ref[0].deiconify)
+            win_ref[0].after(0, win_ref[0].lift)
 
     def quit_app():
         stop_event.set()
-        web.destroy()
+        if win_ref:
+            win_ref[0].after(0, win_ref[0].destroy)
 
-    tray = TrayIcon(on_open_settings=open_window, on_quit=quit_app)
+    # Tray
+    tray = TrayIcon(on_open_settings=open_settings, on_quit=quit_app)
     tray.start()
 
-    # RPC loop
+    # RPC loop in background thread
     rpc_thread = threading.Thread(
         target=rpc_loop,
-        args=(sm, rpc, tray, stop_event),
+        args=(sm, rpc, tray, stop_event, win_ref),
         daemon=True,
     )
     rpc_thread.start()
 
-    # Start webview — BLOCKS on main thread until window closes
-    hide_on_start = launched_by_autostart and config.get("general.start_minimized", True)
-    logger.info("Ready.")
-    web.start(hidden=hide_on_start)
+    # Settings window — Tkinter must live on the main thread
+    win = SettingsWindow(config=config, translator=translator)
+    win_ref.append(win)
 
-    # After window closes
-    stop_event.set()
-    tray.stop()
-    logger.info("Bye.")
+    # Show window:
+    #   - Always show when launched manually (double-click exe or python main.py)
+    #   - Hide to tray only when launched by autostart AND start_minimized is on
+    hide_on_start = launched_by_autostart and config.get("general.start_minimized", True)
+    if hide_on_start:
+        win.withdraw()
+    else:
+        win.deiconify()
+
+    logger.info("Ready.")
+
+    try:
+        win.mainloop()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        stop_event.set()
+        tray.stop()
+        logger.info("Bye.")
 
 
 if __name__ == "__main__":
