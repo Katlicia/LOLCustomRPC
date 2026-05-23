@@ -1,11 +1,9 @@
 """
-State Machine - tracks LoL state and builds RPC payloads.
+State Machine — tracks LoL game state and builds Discord RPC payloads.
 
-All user-facing strings are looked up via the Translator (i18n).
-Locale is auto-detected from LoL client (LCU /riotclient/region-locale).
-
-User-toggleable display options are passed to the constructor.
-When ConfigManager is added in Phase 2, these will read from config directly.
+All user-facing strings are resolved via the Translator (i18n).
+Locale is auto-detected from the LoL client (LCU /riotclient/region-locale).
+Display options are injected at construction and reloaded via apply_config().
 """
 
 import time
@@ -89,20 +87,19 @@ ROLE_KEYS = {
 
 @dataclass
 class DisplayOptions:
-    """
-    User-toggleable display options.
-    In Phase 2, ConfigManager will populate these from config.json.
-    """
     show_nick: bool = True
     show_tag: bool = True  # only takes effect when show_nick is True
     show_rank: bool = True
+    show_level: bool = True
+    show_kda: bool = True
+    logo: str = "lol_logo"  # "lol_logo" or "lol_legacy_logo"
 
 
 @dataclass
 class RPCPayload:
     state_name: State
     details: str = ""
-    state: str = ""
+    state: Optional[str] = None
     large_image: Optional[str] = None
     large_text: Optional[str] = None
     small_image: Optional[str] = None
@@ -157,6 +154,8 @@ class StateMachine:
         self._last_locale_check: float = 0
         self.LOCALE_CHECK_INTERVAL = 300  # re-check every 5 min
 
+        self._last_reported_state: State = State.OFFLINE
+
     def _get_summoner_cached(self) -> Optional[dict]:
         if self._cached_summoner and (time.time() - self._summoner_cache_time) < self.CACHE_DURATION:
             return self._cached_summoner
@@ -183,18 +182,19 @@ class StateMachine:
         lol_locale = self.lcu.get_locale()
         if lol_locale:
             self.t.auto_detect_from_lol(lol_locale)
+            if not self._locale_detected:
+                logger.info(f"Locale auto-detected from LoL client: {lol_locale} -> {self.t.active_locale}")
             self._locale_detected = True
             self._last_locale_check = now
 
     def apply_config(self, config) -> None:
-        """
-        Hot-reload display options from ConfigManager.
-        Called automatically via config.on_save() callback - no restart needed.
-        """
         self.options = DisplayOptions(
             show_nick=config.get("display.show_nick", True),
             show_tag=config.get("display.show_tag", True),
             show_rank=config.get("display.show_rank", True),
+            show_level=config.get("display.show_level", True),
+            show_kda=config.get("display.show_kda", True),
+            logo=config.get("display.logo", "lol_logo"),
         )
         logger.debug(f"Options reloaded: {self.options}")
 
@@ -208,6 +208,7 @@ class StateMachine:
         self._in_game_start_time = 0
         self._last_known_queue_id = 0
         self._locale_detected = False
+        self._last_reported_state = State.OFFLINE
 
     def detect_state(self) -> State:
         if self.live.is_in_game():
@@ -221,8 +222,15 @@ class StateMachine:
         state = self.detect_state()
 
         if state == State.OFFLINE:
+            if not hasattr(self, '_last_reported_state') or self._last_reported_state != State.OFFLINE:
+                logger.info("LoL client not detected — RPC cleared.")
+            self._last_reported_state = State.OFFLINE
             self.invalidate_caches()
             return None
+
+        if not hasattr(self, '_last_reported_state') or self._last_reported_state != state:
+            logger.info(f"State transition: {getattr(self, '_last_reported_state', State.OFFLINE).value} -> {state.value}")
+        self._last_reported_state = state
 
         # Locale auto-detection (only when LoL is open)
         self._auto_detect_locale()
@@ -273,7 +281,7 @@ class StateMachine:
             if rank_text and rank_text != unranked_label:
                 hover_parts.append(rank_text)
 
-        hover_text = " • ".join(hover_parts) or "League of Legends"
+        hover_text = " • ".join(hover_parts) or None
 
         payload.small_image = avatar_url
         payload.small_text = hover_text
@@ -286,14 +294,14 @@ class StateMachine:
         level = summoner.get("summonerLevel", 0)
 
         details_parts = self._user_info_parts(summoner, rank_data)
-        if level:
+        if level and self.options.show_level:
             details_parts.append(self.t.t("level_format", level=level))
 
         return RPCPayload(
             state_name=State.MAIN_MENU,
             details=self.t.t("in_main_menu"),
-            state=" | ".join(details_parts) or "League of Legends",
-            large_image="lol_legacy_logo",
+            state=" | ".join(details_parts) or None,
+            large_image=self.options.logo,
             large_text="League of Legends",
         )
 
@@ -320,8 +328,8 @@ class StateMachine:
         return RPCPayload(
             state_name=State.LOBBY,
             details=details,
-            state=" | ".join(state_parts) or "League of Legends",
-            large_image="lol_legacy_logo",
+            state=" | ".join(state_parts) or None,
+            large_image=self.options.logo,
             large_text="League of Legends",
         )
 
@@ -340,8 +348,8 @@ class StateMachine:
         return RPCPayload(
             state_name=State.MATCHMAKING,
             details=self.t.t("in_queue", queue=queue_label),
-            state=" | ".join(state_parts) or "League of Legends",
-            large_image="lol_legacy_logo",
+            state=" | ".join(state_parts) or None,
+            large_image=self.options.logo,
             large_text="League of Legends",
         )
 
@@ -378,7 +386,7 @@ class StateMachine:
         if display_champ_id and display_champ_id > 0:
             large_image = self.ddragon.champion_icon_by_id(display_champ_id)
         else:
-            large_image = "lol_legacy_logo"
+            large_image = self.options.logo
 
         # details: "Picking champion - Solo/Duo" (if queue known)
         if queue_label:
@@ -389,7 +397,7 @@ class StateMachine:
         return RPCPayload(
             state_name=State.CHAMP_SELECT,
             details=details,
-            state=" | ".join(state_parts) or "League of Legends",
+            state=" | ".join(state_parts) or None,
             large_image=large_image,
             large_text="League of Legends",
         )
@@ -404,7 +412,7 @@ class StateMachine:
                 state_name=State.IN_GAME,
                 details=self.t.t("in_match"),
                 state=self.t.t("loading"),
-                large_image="lol_legacy_logo",
+                large_image=self.options.logo,
                 large_text="League of Legends",
                 start=int(time.time()),
             )
@@ -449,15 +457,18 @@ class StateMachine:
         if not large_image and champion:
             large_image = self.ddragon.champion_loading(champion, skin_id)
         if not large_image:
-            large_image = "lol_legacy_logo"
+            large_image = self.options.logo
 
         large_text = champion if champion else "League of Legends"
 
         # State line: KDA + optional role
-        if role_text:
-            state_text = self.t.t("kda_with_role", k=k, d=d, a=a, role=role_text)
+        if self.options.show_kda:
+            if role_text:
+                state_text = self.t.t("kda_with_role", k=k, d=d, a=a, role=role_text)
+            else:
+                state_text = self.t.t("kda_format", k=k, d=d, a=a)
         else:
-            state_text = self.t.t("kda_format", k=k, d=d, a=a)
+            state_text = role_text or None
 
         # details: "Champion - Queue (if known) - Mode"
         # Examples:
@@ -493,8 +504,8 @@ class StateMachine:
         return RPCPayload(
             state_name=State.POST_GAME,
             details=self.t.t("match_ended"),
-            state=" | ".join(state_parts) or "League of Legends",
-            large_image="lol_legacy_logo",
+            state=" | ".join(state_parts) or None,
+            large_image=self.options.logo,
             large_text="League of Legends",
         )
 
