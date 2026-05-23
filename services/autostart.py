@@ -23,11 +23,14 @@ def _get_exe_path() -> str:
         # Running as PyInstaller .exe
         return f'"{sys.executable}" --minimized'
     else:
-        # Running as a Python script (dev mode)
+        # Running as a Python script — use pythonw.exe to suppress the console window
+        pythonw = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+        if not os.path.exists(pythonw):
+            pythonw = sys.executable  # fallback if pythonw not found
         main_script = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "main.py")
         )
-        return f'"{sys.executable}" "{main_script}" --minimized'
+        return f'"{pythonw}" "{main_script}" --minimized'
 
 
 def enable() -> bool:
