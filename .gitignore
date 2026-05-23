@@ -6,4 +6,8 @@ CONTEXT.md
 dist/
 build/
 
+LoLCustomRPC.spec
+
 __pycache__/
+
+venv/
