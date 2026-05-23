@@ -25,9 +25,7 @@ from typing import Any, Callable, Dict, Optional
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Default configuration
-# ---------------------------------------------------------------------------
 
 DEFAULTS: Dict[str, Any] = {
     "general": {
@@ -39,7 +37,9 @@ DEFAULTS: Dict[str, Any] = {
         "show_nick": True,
         "show_tag": True,         # only meaningful when show_nick=True
         "show_rank": True,
-        "logo": "lol_legacy_logo",  # "lol_logo" or "lol_legacy_logo"
+        "show_level": True,
+        "show_kda": True,
+        "logo": "lol_logo",  # "lol_logo" or "lol_legacy_logo"
     },
 }
 
@@ -47,9 +47,7 @@ DEFAULTS: Dict[str, Any] = {
 CONFIG_VERSION = 1
 
 
-# ---------------------------------------------------------------------------
 # Path helpers
-# ---------------------------------------------------------------------------
 
 def _default_config_dir() -> str:
     """Returns %APPDATA%/LoLRPCCustom on Windows."""
@@ -61,9 +59,7 @@ def _default_config_path() -> str:
     return os.path.join(_default_config_dir(), "config.json")
 
 
-# ---------------------------------------------------------------------------
 # ConfigManager
-# ---------------------------------------------------------------------------
 
 class ConfigManager:
     def __init__(self, config_path: Optional[str] = None):
@@ -72,9 +68,7 @@ class ConfigManager:
         self._save_callbacks: list[Callable] = []
         self.load()
 
-    # ------------------------------------------------------------------
     # Load / Save
-    # ------------------------------------------------------------------
 
     def load(self) -> bool:
         """
@@ -124,9 +118,7 @@ class ConfigManager:
             logger.error(f"Could not save config: {e}")
             return False
 
-    # ------------------------------------------------------------------
     # Get / Set (dot-notation)
-    # ------------------------------------------------------------------
 
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -158,9 +150,7 @@ class ConfigManager:
         """Return a whole top-level section as a dict copy."""
         return dict(self._data.get(section, {}))
 
-    # ------------------------------------------------------------------
     # Hot-reload callbacks
-    # ------------------------------------------------------------------
 
     def on_save(self, callback: Callable) -> None:
         """
@@ -179,9 +169,7 @@ class ConfigManager:
             except Exception as e:
                 logger.warning(f"on_save callback error: {e}")
 
-    # ------------------------------------------------------------------
     # Helpers
-    # ------------------------------------------------------------------
 
     @staticmethod
     def _deep_copy(d: dict) -> dict:
