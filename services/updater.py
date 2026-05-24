@@ -6,10 +6,8 @@ Flow:
   2. download_and_install(info) -> downloads new .exe, replaces current exe via helper script, restarts
 """
 
-import ctypes
 import logging
 import os
-import subprocess
 import sys
 import tempfile
 import threading
@@ -124,41 +122,56 @@ def download_and_install(
             if on_progress:
                 on_progress(100)
 
-            # Get file path
             exe_dir = os.path.dirname(current_exe)
-
-            # Write a tiny batch script to update
             pid = os.getpid()
+
+            # Get the _MEI temp dir path so we can wait for it to be cleaned up
+            mei_dir = getattr(sys, "_MEIPASS", None)
+
+            mei_wait = ""
+            if mei_dir:
+                mei_wait = (
+                    f":waitdel\n"
+                    f"if exist \"{mei_dir}\" (\n"
+                    f"    timeout /t 1 /nobreak >NUL\n"
+                    f"    goto waitdel\n"
+                    f")\n"
+                )
+
             script = (
                 f"@echo off\n"
-                f"set _MEIPASS2=\n"
-                f"set _MEIPASS=\n"
-                f"set PYMEIPASS=\n"
                 f"cd /d \"{exe_dir}\"\n"
-                f":retry\n"
-                f"timeout /t 1 /nobreak >NUL\n"
+                f":waitpid\n"
+                f"tasklist /fi \"PID eq {pid}\" 2>NUL | find \"{pid}\" >NUL\n"
+                f"if not errorlevel 1 (\n"
+                f"    timeout /t 1 /nobreak >NUL\n"
+                f"    goto waitpid\n"
+                f")\n"
+                + mei_wait +
+                f":copy\n"
                 f"copy /y \"{tmp_path}\" \"{current_exe}\" >NUL\n"
-                f"if errorlevel 1 goto retry\n"
-                f"del \"{tmp_path}\" >NUL\n"
-                f"start \"\" \"{current_exe}\"\n"
+                f"if errorlevel 1 (\n"
+                f"    timeout /t 1 /nobreak >NUL\n"
+                f"    goto copy\n"
+                f")\n"
+                f"del \"{tmp_path}\" >NUL 2>NUL\n"
+                f"schtasks /create /tn \"LolRPCRestart\" /tr \"\\\"{current_exe}\\\"\" /sc once /st 00:00 /f >NUL 2>NUL\n"
+                f"schtasks /run /tn \"LolRPCRestart\" >NUL 2>NUL\n"
+                f"timeout /t 3 /nobreak >NUL\n"
+                f"schtasks /delete /tn \"LolRPCRestart\" /f >NUL 2>NUL\n"
                 f"del \"%~f0\"\n"
             )
-            bat_fd, bat_path = tempfile.mkstemp(suffix=".bat", prefix="lolrpc_script_")
+            bat_fd, bat_path = tempfile.mkstemp(suffix=".bat", prefix="lolrpc_upd_")
             with os.fdopen(bat_fd, "w") as f:
                 f.write(script)
 
-            os.environ.pop("_MEIPASS2", None)
-            os.environ.pop("PYMEIPASS", None)
+            logger.info(f"Launching update script: {bat_path}")
 
+            import ctypes
             ctypes.windll.shell32.ShellExecuteW(
-                None, 
-                "open", 
-                "cmd.exe", 
-                f'/c "{bat_path}"', 
-                exe_dir, 
-                0
+                None, "open", "cmd.exe", f'/c "{bat_path}"', None, 0
             )
-           
+
             os._exit(0)
 
         except Exception as e:
