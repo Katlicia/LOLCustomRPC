@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Ferro",
+  "tier_bronze": "Bronze",
+  "tier_silver": "Prata",
+  "tier_gold": "Ouro",
+  "tier_platinum": "Platina",
+  "tier_emerald": "Esmeralda",
+  "tier_diamond": "Diamante",
+  "tier_master": "Mestre",
+  "tier_grandmaster": "Grão-Mestre",
+  "tier_challenger": "Desafiante",
+
   "role_top": "Topo",
   "role_jungle": "Selva",
   "role_mid": "Meio",

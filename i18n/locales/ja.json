@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "アイアン",
+  "tier_bronze": "ブロンズ",
+  "tier_silver": "シルバー",
+  "tier_gold": "ゴールド",
+  "tier_platinum": "プラチナ",
+  "tier_emerald": "エメラルド",
+  "tier_diamond": "ダイヤモンド",
+  "tier_master": "マスター",
+  "tier_grandmaster": "グランドマスター",
+  "tier_challenger": "チャレンジャー",
+
   "role_top": "トップ",
   "role_jungle": "ジャングル",
   "role_mid": "ミッド",

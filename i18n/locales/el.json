@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Σιδερένια",
+  "tier_bronze": "Χάλκινη",
+  "tier_silver": "Ασημένια",
+  "tier_gold": "Χρυσή",
+  "tier_platinum": "Πλατινένια",
+  "tier_emerald": "Σμαραγδένια",
+  "tier_diamond": "Αδαμάντινη",
+  "tier_master": "Κυρίαρχος",
+  "tier_grandmaster": "Επικυρίαρχος",
+  "tier_challenger": "Διεκδικητής",
+
   "role_top": "Top",
   "role_jungle": "Ζούγκλα",
   "role_mid": "Μέσο",

@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "ไอรอน",
+  "tier_bronze": "บรอนซ์",
+  "tier_silver": "ซิลเวอร์",
+  "tier_gold": "โกลด์",
+  "tier_platinum": "แพลทินัม",
+  "tier_emerald": "เอเมอรัลด์",
+  "tier_diamond": "ไดมอนด์",
+  "tier_master": "มาสเตอร์",
+  "tier_grandmaster": "แกรนด์มาสเตอร์",
+  "tier_challenger": "ชาเลนเจอร์",
+
   "role_top": "เลน Top",
   "role_jungle": "ป่า",
   "role_mid": "กลาง",

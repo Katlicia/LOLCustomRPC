@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Hierro",
+  "tier_bronze": "Bronce",
+  "tier_silver": "Plata",
+  "tier_gold": "Oro",
+  "tier_platinum": "Platino",
+  "tier_emerald": "Esmeralda",
+  "tier_diamond": "Diamante",
+  "tier_master": "Maestro",
+  "tier_grandmaster": "Gran Maestro",
+  "tier_challenger": "Aspirante",
+
   "role_top": "Superior",
   "role_jungle": "Jungla",
   "role_mid": "Central",

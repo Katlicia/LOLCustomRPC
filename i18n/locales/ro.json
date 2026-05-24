@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Fier",
+  "tier_bronze": "Bronz",
+  "tier_silver": "Argint",
+  "tier_gold": "Aur",
+  "tier_platinum": "Platină",
+  "tier_emerald": "Smarald",
+  "tier_diamond": "Diamant",
+  "tier_master": "Master",
+  "tier_grandmaster": "Grandmaster",
+  "tier_challenger": "Challenger",
+
   "role_top": "Top",
   "role_jungle": "Junglă",
   "role_mid": "Mid",

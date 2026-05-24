@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Vas",
+  "tier_bronze": "Bronz",
+  "tier_silver": "Ezüst",
+  "tier_gold": "Arany",
+  "tier_platinum": "Platina",
+  "tier_emerald": "Smaragd",
+  "tier_diamond": "Gyémánt",
+  "tier_master": "Mesteri",
+  "tier_grandmaster": "Nagymesteri",
+  "tier_challenger": "Kihívó",
+
   "role_top": "Top",
   "role_jungle": "Dzsungel",
   "role_mid": "Közép",

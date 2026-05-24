@@ -15,9 +15,20 @@
   "kda_with_role": "KDA: {k}/{d}/{a} | {role}",
   "level_format": "Sv.{level}",
 
-  "rank_unranked": "Ranksız",
+  "rank_unranked": "Derecesiz",
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
+
+  "tier_iron": "Demir",
+  "tier_bronze": "Bronz",
+  "tier_silver": "Gümüş",
+  "tier_gold": "Altın",
+  "tier_platinum": "Platin",
+  "tier_emerald": "Zümrüt",
+  "tier_diamond": "Elmas",
+  "tier_master": "Ustalık",
+  "tier_grandmaster": "Üstatlık",
+  "tier_challenger": "Şampiyonluk",
 
   "role_top": "Üst",
   "role_jungle": "Orman",
@@ -25,7 +36,7 @@
   "role_adc": "AD Carry",
   "role_support": "Destek",
 
-  "queue_solo_duo": "Tekli/İkili",
+  "queue_solo_duo": "Tek/Çift",
   "queue_flex": "Esnek",
   "queue_aram": "ARAM",
   "queue_normal_draft": "Normal Seçim",

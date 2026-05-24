@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Железо",
+  "tier_bronze": "Бронза",
+  "tier_silver": "Серебро",
+  "tier_gold": "Золото",
+  "tier_platinum": "Платина",
+  "tier_emerald": "Изумруд",
+  "tier_diamond": "Алмаз",
+  "tier_master": "Мастер",
+  "tier_grandmaster": "Грандмастер",
+  "tier_challenger": "Претендент",
+
   "role_top": "Топ",
   "role_jungle": "Джунгли",
   "role_mid": "Мид",

@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Železná",
+  "tier_bronze": "Bronzová",
+  "tier_silver": "Stříbrná",
+  "tier_gold": "Zlatá",
+  "tier_platinum": "Platinová",
+  "tier_emerald": "Smaragdová",
+  "tier_diamond": "Diamantová",
+  "tier_master": "Mistrovská",
+  "tier_grandmaster": "Velmistrovská",
+  "tier_challenger": "Vyzyvatelská",
+
   "role_top": "Top",
   "role_jungle": "Džungle",
   "role_mid": "Mid",

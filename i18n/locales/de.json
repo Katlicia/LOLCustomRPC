@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Eisen",
+  "tier_bronze": "Bronze",
+  "tier_silver": "Silber",
+  "tier_gold": "Gold",
+  "tier_platinum": "Platin",
+  "tier_emerald": "Smaragd",
+  "tier_diamond": "Diamant",
+  "tier_master": "Meister",
+  "tier_grandmaster": "Großmeister",
+  "tier_challenger": "Herausforderer",
+
   "role_top": "Top",
   "role_jungle": "Jungle",
   "role_mid": "Mitte",

@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Sắt",
+  "tier_bronze": "Đồng",
+  "tier_silver": "Bạc",
+  "tier_gold": "Vàng",
+  "tier_platinum": "Bạch Kim",
+  "tier_emerald": "Lục Bảo",
+  "tier_diamond": "Kim Cương",
+  "tier_master": "Cao Thủ",
+  "tier_grandmaster": "Đại Cao Thủ",
+  "tier_challenger": "Thách Đấu",
+
   "role_top": "Đường Trên",
   "role_jungle": "Rừng",
   "role_mid": "Giữa",

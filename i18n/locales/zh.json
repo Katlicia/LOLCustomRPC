@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "黑铁",
+  "tier_bronze": "青铜",
+  "tier_silver": "白银",
+  "tier_gold": "黄金",
+  "tier_platinum": "铂金",
+  "tier_emerald": "翡翠",
+  "tier_diamond": "钻石",
+  "tier_master": "大师",
+  "tier_grandmaster": "宗师",
+  "tier_challenger": "王者",
+
   "role_top": "上路",
   "role_jungle": "打野",
   "role_mid": "中路",

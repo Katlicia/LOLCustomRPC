@@ -19,6 +19,17 @@
   "rank_format": "{tier} {division}",
   "rank_format_no_division": "{tier}",
 
+  "tier_iron": "Żelazo",
+  "tier_bronze": "Brąz",
+  "tier_silver": "Srebro",
+  "tier_gold": "Złoto",
+  "tier_platinum": "Platyna",
+  "tier_emerald": "Szmaragd",
+  "tier_diamond": "Diament",
+  "tier_master": "Mistrz",
+  "tier_grandmaster": "Arcymistrz",
+  "tier_challenger": "Pretendent",
+
   "role_top": "Top",
   "role_jungle": "Dżungla",
   "role_mid": "Mid",
