@@ -98,12 +98,14 @@ class GUILogHandler(logging.Handler):
 
 class SettingsWindow(ctk.CTk):
 
-    def __init__(self, config: ConfigManager, translator: Optional[Translator] = None, on_close: Optional[Callable] = None, app_version: str = ""):
+    def __init__(self, config: ConfigManager, translator: Optional[Translator] = None, on_close: Optional[Callable] = None, app_version: str = "", on_pause_toggle: Optional[Callable] = None, is_paused_fn: Optional[Callable] = None):
         super().__init__()
-        self._config      = config
-        self._translator  = translator
-        self._on_close    = on_close
-        self._app_version = app_version
+        self._config         = config
+        self._translator     = translator
+        self._on_close       = on_close
+        self._app_version    = app_version
+        self._on_pause_toggle = on_pause_toggle
+        self._is_paused_fn   = is_paused_fn
         self._pending: dict = {}
         self._log_q: queue.Queue = queue.Queue(maxsize=500)
         self._active = "display"
@@ -446,6 +448,34 @@ class SettingsWindow(ctk.CTk):
         self._preview.set_level_visible(self._config.get("display.show_level", True))
         self._preview.set_kda_visible(self._config.get("display.show_kda", True))
         self._preview.set_role_visible(self._config.get("display.show_role", True))
+
+        # Pause controls below preview
+        pause_bar = ctk.CTkFrame(right, fg_color="transparent")
+        pause_bar.grid(row=2, column=0, sticky="ew", pady=(10, 0))
+        pause_bar.grid_columnconfigure(0, weight=1)
+
+        self._status_dot = ctk.CTkLabel(
+            pause_bar, text="● RPC Active",
+            font=ctk.CTkFont(family=FONT_UI, size=13),
+            text_color=GREEN,
+        )
+        self._status_dot.grid(row=0, column=0, sticky="w")
+
+        self._pause_btn = ctk.CTkButton(
+            pause_bar,
+            text="Pause RPC",
+            command=self._toggle_pause,
+            font=ctk.CTkFont(family=FONT_UI, size=13),
+            fg_color=CARD,
+            hover_color=BORDER2,
+            text_color=WHITE,
+            border_width=1,
+            border_color=BORDER2,
+            width=120, height=30,
+            corner_radius=6,
+        )
+        self._pause_btn.grid(row=0, column=1, sticky="e")
+        self._sync_pause_ui()
 
         # Log strip — spans bottom of both columns
         log_strip = ctk.CTkFrame(panel, fg_color=SURFACE, corner_radius=0, height=200)
@@ -972,6 +1002,26 @@ class SettingsWindow(ctk.CTk):
             self._log_box.configure(state="disabled")
 
         self.after(200, self._poll_logs)
+
+    # Pause
+
+    def _toggle_pause(self):
+        if self._on_pause_toggle:
+            self._on_pause_toggle()
+        self._sync_pause_ui()
+
+    def _sync_pause_ui(self):
+        paused = self._is_paused_fn() if self._is_paused_fn else False
+        if paused:
+            self._status_dot.configure(text="⏸ RPC Paused", text_color=MUTED)
+            self._pause_btn.configure(text="Resume RPC", fg_color=ACCENT, hover_color=ACCENT_DIM)
+        else:
+            self._status_dot.configure(text="● RPC Active", text_color=GREEN)
+            self._pause_btn.configure(text="Pause RPC", fg_color=CARD, hover_color=BORDER2)
+
+    def set_paused(self, paused: bool):
+        """Called externally (e.g. from tray) to sync UI state."""
+        self._sync_pause_ui()
 
     # Close
 
