@@ -461,8 +461,6 @@ class StateMachine:
         if not large_image:
             large_image = self.options.logo
 
-        large_text = champion if champion else "LoLCustomRPC"
-
         # State line: KDA + optional role
         effective_role = role_text if self.options.show_role else ""
         if self.options.show_kda:
@@ -493,7 +491,7 @@ class StateMachine:
             details=details,
             state=state_text,
             large_image=large_image,
-            large_text=large_text,
+            large_text="LoLCustomRPC",
             start=start_ts,
         )
 
