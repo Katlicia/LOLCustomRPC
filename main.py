@@ -11,6 +11,7 @@ import sys
 import time
 import logging
 import threading
+import ctypes
 
 from dotenv import load_dotenv
 
@@ -24,12 +25,19 @@ from core.ddragon import DDragon
 from i18n.translator import Translator
 from services.config import ConfigManager
 from services import autostart
+from services.updater import check_async
 from ui.tray import TrayIcon
 from ui.settings_window import SettingsWindow
 
 load_dotenv()
 
-CLIENT_ID = os.getenv("DISCORD_CLIENT_ID") or None
+# _client_id.py is generated at build time (gitignored) and baked into the exe.
+# Falls back to .env for local development.
+try:
+    from _client_id import CLIENT_ID  # type: ignore
+except ImportError:
+    CLIENT_ID = os.getenv("DISCORD_CLIENT_ID") or None
+APP_VERSION = "1.0.0"
 
 POLL_INTERVALS = {
     State.OFFLINE:      30.0,
@@ -111,6 +119,15 @@ def rpc_loop(
 
 # Main
 def main():
+    # Mutex control
+    mutex_name = "LoLCustomRPC_SingleInstance_Lock"
+
+    mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
+
+    if ctypes.windll.kernel32.GetLastError() == 183:
+            print("Another instance is already running. Exiting.")
+            sys.exit(0)
+
     setup_logging()
     logger = logging.getLogger("main")
 
@@ -141,6 +158,7 @@ def main():
             show_rank=config.get("display.show_rank", True),
             show_level=config.get("display.show_level", True),
             show_kda=config.get("display.show_kda", True),
+            show_role=config.get("display.show_role", True),
             logo=config.get("display.logo", "lol_logo"),
         ),
     )
@@ -177,8 +195,14 @@ def main():
     rpc_thread.start()
 
     # Settings window — Tkinter must live on the main thread
-    win = SettingsWindow(config=config, translator=translator)
+    win = SettingsWindow(config=config, translator=translator, app_version=APP_VERSION)
     win_ref.append(win)
+
+    # Background update check — notifies via win.notify_update on the main thread
+    check_async(
+        APP_VERSION,
+        on_update_found=lambda info: win.notify_update(info),
+    )
 
     # Show window:
     #   - Always show when launched manually (double-click exe or python main.py)
