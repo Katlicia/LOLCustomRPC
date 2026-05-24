@@ -703,7 +703,7 @@ class SettingsWindow(ctk.CTk):
             msg = (
                 f"v{info.version} is ready to install.\n\n"
                 f"The app will restart after the update.\n"
-                f"Don't forget to relaunch League of Legends.\n"
+                f"Don't forget to relaunch League of Legends test.\n"
                 f"Continue?"
             )
         else:
