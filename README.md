@@ -21,6 +21,10 @@
 
 LoLCustomRPC is a fully customizable Discord Rich Presence client that shows your live League of Legends status — including your champion, skin, KDA, rank, role, queue type, and more. It runs seamlessly in the background as a system tray icon and updates your profile automatically.
 
+<p align="center">
+  <img src="assets/preview.jpg" alt="RPC Preview">
+</p>
+
 ## Features
 
 - Live game status — champion, KDA, role, queue type, game mode
@@ -32,11 +36,8 @@ LoLCustomRPC is a fully customizable Discord Rich Presence client that shows you
 - Minimal system tray footprint
 - Start with Windows option
 
-## Preview
+## App Preview
 
-<p align="center">
-  <img src="assets/preview.jpg" alt="RPC Preview">
-</p>
 <p align="center">
   <img src="assets/screenshot.png" alt="LoLCustomRPC Screenshot">
 </p>
