@@ -43,7 +43,7 @@ jobs:
 
       - name: Build exe with PyInstaller
         run: |
-          pyinstaller --noconsole --onefile --name "LoLCustomRPC" --add-data "assets;assets" --add-data "i18n/locales;i18n/locales" --collect-all customtkinter main.py
+          pyinstaller LoLCustomRPC.spec
 
       - name: Create GitHub Release and upload exe
         uses: softprops/action-gh-release@v2
