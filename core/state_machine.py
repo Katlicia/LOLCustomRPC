@@ -92,6 +92,7 @@ class DisplayOptions:
     show_rank: bool = True
     show_level: bool = True
     show_kda: bool = True
+    show_role: bool = True
     logo: str = "lol_logo"  # "lol_logo" or "lol_legacy_logo"
 
 
@@ -194,6 +195,7 @@ class StateMachine:
             show_rank=config.get("display.show_rank", True),
             show_level=config.get("display.show_level", True),
             show_kda=config.get("display.show_kda", True),
+            show_role=config.get("display.show_role", True),
             logo=config.get("display.logo", "lol_logo"),
         )
         logger.debug(f"Options reloaded: {self.options}")
@@ -302,7 +304,7 @@ class StateMachine:
             details=self.t.t("in_main_menu"),
             state=" | ".join(details_parts) or None,
             large_image=self.options.logo,
-            large_text="League of Legends",
+            large_text="LoLCustomRPC",
         )
 
     def _build_lobby(self) -> RPCPayload:
@@ -330,7 +332,7 @@ class StateMachine:
             details=details,
             state=" | ".join(state_parts) or None,
             large_image=self.options.logo,
-            large_text="League of Legends",
+            large_text="LoLCustomRPC",
         )
 
     def _build_matchmaking(self) -> RPCPayload:
@@ -350,7 +352,7 @@ class StateMachine:
             details=self.t.t("in_queue", queue=queue_label),
             state=" | ".join(state_parts) or None,
             large_image=self.options.logo,
-            large_text="League of Legends",
+            large_text="LoLCustomRPC",
         )
 
     def _build_champ_select(self) -> RPCPayload:
@@ -399,7 +401,7 @@ class StateMachine:
             details=details,
             state=" | ".join(state_parts) or None,
             large_image=large_image,
-            large_text="League of Legends",
+            large_text="LoLCustomRPC",
         )
 
     def _build_ingame(self) -> Optional[RPCPayload]:
@@ -413,7 +415,7 @@ class StateMachine:
                 details=self.t.t("in_match"),
                 state=self.t.t("loading"),
                 large_image=self.options.logo,
-                large_text="League of Legends",
+                large_text="LoLCustomRPC",
                 start=int(time.time()),
             )
 
@@ -459,16 +461,17 @@ class StateMachine:
         if not large_image:
             large_image = self.options.logo
 
-        large_text = champion if champion else "League of Legends"
+        large_text = champion if champion else "LoLCustomRPC"
 
         # State line: KDA + optional role
+        effective_role = role_text if self.options.show_role else ""
         if self.options.show_kda:
-            if role_text:
-                state_text = self.t.t("kda_with_role", k=k, d=d, a=a, role=role_text)
+            if effective_role:
+                state_text = self.t.t("kda_with_role", k=k, d=d, a=a, role=effective_role)
             else:
                 state_text = self.t.t("kda_format", k=k, d=d, a=a)
         else:
-            state_text = role_text or None
+            state_text = effective_role or None
 
         # details: "Champion - Queue (if known) - Mode"
         # Examples:
@@ -506,7 +509,7 @@ class StateMachine:
             details=self.t.t("match_ended"),
             state=" | ".join(state_parts) or None,
             large_image=self.options.logo,
-            large_text="League of Legends",
+            large_text="LoLCustomRPC",
         )
 
     # Display helpers that respect toggles
@@ -569,7 +572,7 @@ class StateMachine:
         key = ROLE_KEYS.get(position.upper())
         if key:
             return self.t.t(key)
-        return position.capitalize()
+        return ""
 
     # Other helpers
 
@@ -582,7 +585,9 @@ class StateMachine:
                 tier = q.get("tier", "")
                 division = q.get("division", "")
                 if tier and tier.upper() not in ("NONE", "UNRANKED", ""):
-                    tier_display = tier.capitalize()
+                    tier_key = f"tier_{tier.lower()}"
+                    translated = self.t.t(tier_key)
+                    tier_display = tier.capitalize() if translated == tier_key else translated
                     if division and division != "NA":
                         return self.t.t("rank_format", tier=tier_display, division=division)
                     return self.t.t("rank_format_no_division", tier=tier_display)
