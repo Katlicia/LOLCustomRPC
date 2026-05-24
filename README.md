@@ -74,6 +74,7 @@ Open the settings window to customize:
 
 **Requirements:** Python 3.10+
 
+Don't forget to create .env file (check .env.example)
 ```bash
 git clone https://github.com/Katlicia/LOLCustomRPC.git
 cd LOLCustomRPC
