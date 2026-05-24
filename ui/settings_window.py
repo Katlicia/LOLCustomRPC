@@ -596,13 +596,19 @@ class SettingsWindow(ctk.CTk):
         ctk.CTkFrame(panel, height=1, width=200, fg_color=BORDER).pack()
 
         link = ctk.CTkLabel(
-            panel, text="https://github.com/Katlicia/LOLCustomRPC",
+            panel, text="github.com/Katlicia/LOLCustomRPC",
             font=ctk.CTkFont(family=FONT_UI, size=16),
             text_color=ACCENT,
             cursor="hand2",
         )
-        link.pack(pady=16)
+        link.pack(pady=(16, 4))
         link.bind("<Button-1>", lambda _e: __import__("webbrowser").open("https://github.com/Katlicia/LOLCustomRPC"))
+
+        ctk.CTkLabel(
+            panel, text="Discord: yapamiyom.",
+            font=ctk.CTkFont(family=FONT_UI, size=15),
+            text_color=MUTED,
+        ).pack(pady=(0, 16))
 
         return panel
 
