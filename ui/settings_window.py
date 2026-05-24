@@ -110,6 +110,10 @@ class SettingsWindow(ctk.CTk):
 
         self.title("LoLCustomRPC")
         self.geometry("1120x760")
+        import os as _os
+        _ico = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), "assets", "winicon.ico")
+        if _os.path.exists(_ico):
+            self.iconbitmap(_ico)
         self.minsize(960, 660)
         self.resizable(True, True)
         self.configure(fg_color=BASE)
@@ -149,53 +153,50 @@ class SettingsWindow(ctk.CTk):
         hdr.grid(row=0, column=0, sticky="ew")
         hdr.grid_columnconfigure(0, weight=1)
 
-        # Single row: title | tabs (flex spacer) | status dot
+        import os as _os
+        from PIL import Image as _Image
+
+        # Single row: icon | tabs | (spacer) | status dots + bug button
         row = ctk.CTkFrame(hdr, fg_color="transparent")
-        row.pack(fill="x", padx=20, pady=(14, 0))
+        row.pack(fill="x", padx=20, pady=(8, 0))
+
+        # Icon — leftmost
+        _icon_path = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), "assets", "icon.png")
+        _icon_img = ctk.CTkImage(_Image.open(_icon_path), size=(180, 60))
+        ctk.CTkLabel(row, text="", image=_icon_img).pack(side="left", padx=(0, 8))
 
         # Status indicators + bug button — all anchored to the right edge
         sf = ctk.CTkFrame(row, fg_color="transparent")
         sf.pack(side="right")
 
         # Discord status
-        self._discord_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=15), text_color=RED)
+        self._discord_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=13), text_color=RED)
         self._discord_dot.pack(side="left", padx=(0, 4))
         self._discord_lbl = ctk.CTkLabel(
             sf, text="Discord",
-            font=ctk.CTkFont(family=FONT_UI, size=15),
+            font=ctk.CTkFont(family=FONT_UI, size=13),
             text_color=MUTED,
         )
-        self._discord_lbl.pack(side="left", padx=(0, 16))
+        self._discord_lbl.pack(side="left", padx=(0, 12))
 
         # LoL status
-        self._lol_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=15), text_color=RED)
+        self._lol_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=13), text_color=RED)
         self._lol_dot.pack(side="left", padx=(0, 4))
         self._lol_lbl = ctk.CTkLabel(
             sf, text="LoL",
-            font=ctk.CTkFont(family=FONT_UI, size=15),
+            font=ctk.CTkFont(family=FONT_UI, size=13),
             text_color=MUTED,
         )
-        self._lol_lbl.pack(side="left", padx=(0, 16))
+        self._lol_lbl.pack(side="left", padx=(0, 12))
 
         # Bug report button — rightmost
-        import os as _os
-        from PIL import Image as _Image
         _bug_path = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), "assets", "78946.png")
-        _bug_img = ctk.CTkImage(_Image.open(_bug_path), size=(16, 16))
-        bug_btn = ctk.CTkLabel(
-            sf, text="", image=_bug_img,
-            cursor="hand2",
-        )
+        _bug_img = ctk.CTkImage(_Image.open(_bug_path), size=(14, 14))
+        bug_btn = ctk.CTkLabel(sf, text="", image=_bug_img, cursor="hand2")
         bug_btn.pack(side="left")
         bug_btn.bind("<Button-1>", lambda _e: __import__("webbrowser").open("https://github.com/Katlicia/LOLCustomRPC/issues/new"))
 
-        ctk.CTkLabel(
-            row, text="LoLCustomRPC",
-            font=ctk.CTkFont(family=FONT_UI, size=22, weight="bold"),
-            text_color=WHITE,
-        ).pack(side="left", padx=(0, 16))
-
-        # Tab buttons immediately right of title
+        # Tab buttons — between icon and right cluster
         self._nav_btns: dict[str, ctk.CTkButton] = {}
         nav = [
             ("display",  "Display"),
@@ -206,20 +207,20 @@ class SettingsWindow(ctk.CTk):
         for key, label in nav:
             btn = ctk.CTkButton(
                 row, text=label,
-                font=ctk.CTkFont(family=FONT_UI, size=16),
+                font=ctk.CTkFont(family=FONT_UI, size=13),
                 fg_color="transparent",
                 hover_color=CARD,
                 text_color=MUTED,
                 corner_radius=6,
-                height=36,
-                width=110,
+                height=28,
+                width=90,
                 command=lambda k=key: self._show_nav(k),
             )
             btn.pack(side="left", padx=(0, 2))
             self._nav_btns[key] = btn
 
-        # Thin separator under header row
-        ctk.CTkFrame(hdr, height=1, fg_color=BORDER).pack(fill="x", pady=(10, 0))
+        # Thin separator under header
+        ctk.CTkFrame(hdr, height=1, fg_color=BORDER).pack(fill="x", pady=(6, 0))
 
     # Main area
 

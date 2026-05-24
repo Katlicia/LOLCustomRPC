@@ -21,19 +21,19 @@ from pystray import MenuItem as item, Menu
 logger = logging.getLogger(__name__)
 
 
-def _make_icon_image(color: str = "#5865f2", size: int = 64) -> Image.Image:
-    """
-    Generate a simple tinted circular icon.
-    In production this will load a proper .ico asset from assets/.
-    """
+import os as _os
+_ASSETS = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), "assets")
+_TRAY_PNG = _os.path.join(_ASSETS, "winicon.png")
+
+
+def _load_tray_icon() -> Image.Image:
+    if _os.path.exists(_TRAY_PNG):
+        return Image.open(_TRAY_PNG).convert("RGBA")
+    # Fallback: generated placeholder
+    size = 64
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    # Outer circle
-    draw.ellipse([2, 2, size - 2, size - 2], fill=color)
-    # Inner "L" shape (LoL reference)
-    m = size // 5
-    draw.rectangle([m, m, m * 2, size - m], fill="white")
-    draw.rectangle([m, size - m * 2, size - m, size - m], fill="white")
+    draw.ellipse([2, 2, size - 2, size - 2], fill="#5865f2")
     return img
 
 
@@ -60,7 +60,7 @@ class TrayIcon:
         """Start the tray icon in a daemon thread."""
         self._icon = pystray.Icon(
             name="lol-rpc-custom",
-            icon=_make_icon_image(),
+            icon=_load_tray_icon(),
             title="LoLCustomRPC",
             menu=self._build_menu(),
         )
@@ -104,9 +104,13 @@ class TrayIcon:
 
     def _toggle_pause(self):
         self._paused = not self._paused
-        self._icon.icon = _make_icon_image(
-            color="#72767d" if self._paused else "#5865f2"
-        )
+        img = _load_tray_icon()
+        if self._paused:
+            # Dim the icon to indicate paused state
+            r, g, b, a = img.split()
+            a = a.point(lambda x: int(x * 0.4))
+            img = Image.merge("RGBA", (r, g, b, a))
+        self._icon.icon = img
         self._refresh_menu()
         logger.info(f"RPC {'paused' if self._paused else 'resumed'}.")
 
@@ -120,8 +124,11 @@ class TrayIcon:
         return self._paused
 
     def set_connected(self, connected: bool):
-        """Change icon tint to reflect Discord connection status."""
+        """Dim icon when disconnected from Discord."""
         if self._icon and not self._paused:
-            self._icon.icon = _make_icon_image(
-                color="#5865f2" if connected else "#ed4245"
-            )
+            img = _load_tray_icon()
+            if not connected:
+                r, g, b, a = img.split()
+                a = a.point(lambda x: int(x * 0.4))
+                img = Image.merge("RGBA", (r, g, b, a))
+            self._icon.icon = img
