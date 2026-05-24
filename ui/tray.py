@@ -14,6 +14,7 @@ import threading
 import logging
 from typing import Callable, Optional
 
+
 from PIL import Image, ImageDraw
 import pystray
 from pystray import MenuItem as item, Menu
@@ -48,11 +49,13 @@ class TrayIcon:
         self,
         on_open_settings: Callable,
         on_quit: Callable,
+        on_pause_changed: Optional[Callable] = None,
     ):
         self._on_open_settings = on_open_settings
         self._on_quit = on_quit
+        self._on_pause_changed = on_pause_changed
         self._paused = False
-        self._icon: Optional[pystray.Icon] = None
+        self._icon = None
         self._thread: Optional[threading.Thread] = None
 
     # Lifecycle
@@ -64,8 +67,6 @@ class TrayIcon:
             title="LoLCustomRPC",
             menu=self._build_menu(),
         )
-        # Double-click opens settings
-        self._icon.default_action = lambda icon, item: self._open_settings()
 
         self._thread = threading.Thread(target=self._icon.run, daemon=True)
         self._thread.start()
@@ -80,7 +81,7 @@ class TrayIcon:
         return Menu(
             item("LoLCustomRPC", lambda: None, enabled=False),
             Menu.SEPARATOR,
-            item("Open Settings", lambda: self._open_settings()),
+            item("Open Settings", lambda: self._open_settings(), default=True),
             Menu.SEPARATOR,
             item(
                 "Pause RPC",
@@ -106,13 +107,18 @@ class TrayIcon:
         self._paused = not self._paused
         img = _load_tray_icon()
         if self._paused:
-            # Dim the icon to indicate paused state
             r, g, b, a = img.split()
             a = a.point(lambda x: int(x * 0.4))
             img = Image.merge("RGBA", (r, g, b, a))
         self._icon.icon = img
         self._refresh_menu()
+        if self._on_pause_changed:
+            self._on_pause_changed(self._paused)
         logger.info(f"RPC {'paused' if self._paused else 'resumed'}.")
+
+    def toggle_pause(self):
+        """Public method — called from settings window."""
+        self._toggle_pause()
 
     def _quit(self):
         self.stop()
