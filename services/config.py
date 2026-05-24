@@ -33,6 +33,7 @@ DEFAULTS: Dict[str, Any] = {
         "autostart": True,        # start with Windows
         "start_minimized": True,  # go straight to tray on launch
         "auto_update": True,      # automatically download and install updates
+        "shown_welcome": False,   # one-time welcome popup
     },
     "display": {
         "show_nick": True,

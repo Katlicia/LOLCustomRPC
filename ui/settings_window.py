@@ -133,6 +133,9 @@ class SettingsWindow(ctk.CTk):
         # Start breathe animation for both dots at their initial red color
         self.after(100, lambda: self._start_breathe(self._lol_dot, RED))
         self.after(150, lambda: self._start_breathe(self._discord_dot, RED))
+        # One-time welcome popup
+        if not self._config.get("general.shown_welcome", False):
+            self.after(500, self._show_welcome)
 
     # Layout
 
@@ -975,3 +978,23 @@ class SettingsWindow(ctk.CTk):
         self.withdraw()
         if self._on_close:
             self._on_close()
+    
+    # Show Welcome Popup
+    def _show_welcome(self):
+        from tkinter import messagebox
+
+        msg = ( 
+            "Welcome to LoLCustomRPC!\n\n"
+            "IMPORTANT: For the application to detect your game correctly, "
+            "you must always start LoLCustomRPC BEFORE opening League of Legends.\n\n"
+            "If you open the app while the game is already running, it might will be overridden by League's official RPC.\n\n"
+            "Note: Since the app is set to start automatically with Windows, you only need "
+            "to open it manually this first time (unless you turn off auto-start in Settings)."
+        )
+        
+        # Show popup
+        messagebox.showinfo("Important Notice", msg, parent=self)
+        
+        # Save to config that we've shown the welcome message, so it doesn't show again
+        self._config.set("general.shown_welcome", True)
+        self._config.save()
