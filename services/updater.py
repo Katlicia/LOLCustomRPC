@@ -123,19 +123,17 @@ def download_and_install(
             if on_progress:
                 on_progress(100)
 
-            # Write a tiny batch script that:
-            #   1. waits for this PID to exit
-            #   2. copies the new exe over the old one
-            #   3. relaunches
+            # Write a tiny batch script to update
             pid = os.getpid()
             script = (
                 f"@echo off\n"
-                f":wait\n"
-                f"tasklist /FI \"PID eq {pid}\" 2>NUL | find \"{pid}\" >NUL\n"
-                f"if not errorlevel 1 ( timeout /t 1 /nobreak >NUL & goto wait )\n"
+                f":retry\n"
+                f"timeout /t 1 /nobreak >NUL\n"
                 f"copy /y \"{tmp_path}\" \"{current_exe}\" >NUL\n"
+                f"if errorlevel 1 goto retry\n"
                 f"del \"{tmp_path}\" >NUL\n"
                 f"start \"\" \"{current_exe}\"\n"
+                f"del \"%~f0\"\n"
             )
             bat_fd, bat_path = tempfile.mkstemp(suffix=".bat", prefix="lolrpc_upd_")
             with os.fdopen(bat_fd, "w") as f:
