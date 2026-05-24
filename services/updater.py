@@ -131,6 +131,9 @@ def download_and_install(
             pid = os.getpid()
             script = (
                 f"@echo off\n"
+                f"set _MEIPASS2=\n"
+                f"set _MEIPASS=\n"
+                f"set PYMEIPASS=\n"
                 f"cd /d \"{exe_dir}\"\n"
                 f":retry\n"
                 f"timeout /t 1 /nobreak >NUL\n"
@@ -143,6 +146,9 @@ def download_and_install(
             bat_fd, bat_path = tempfile.mkstemp(suffix=".bat", prefix="lolrpc_script_")
             with os.fdopen(bat_fd, "w") as f:
                 f.write(script)
+
+            os.environ.pop("_MEIPASS2", None)
+            os.environ.pop("PYMEIPASS", None)
 
             ctypes.windll.shell32.ShellExecuteW(
                 None, 
