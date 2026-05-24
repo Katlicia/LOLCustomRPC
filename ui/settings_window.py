@@ -98,11 +98,12 @@ class GUILogHandler(logging.Handler):
 
 class SettingsWindow(ctk.CTk):
 
-    def __init__(self, config: ConfigManager, translator: Optional[Translator] = None, on_close: Optional[Callable] = None):
+    def __init__(self, config: ConfigManager, translator: Optional[Translator] = None, on_close: Optional[Callable] = None, app_version: str = ""):
         super().__init__()
-        self._config     = config
-        self._translator = translator
-        self._on_close   = on_close
+        self._config      = config
+        self._translator  = translator
+        self._on_close    = on_close
+        self._app_version = app_version
         self._pending: dict = {}
         self._log_q: queue.Queue = queue.Queue(maxsize=500)
         self._active = "display"
@@ -125,6 +126,9 @@ class SettingsWindow(ctk.CTk):
         self._load_from_config()
         self._show_nav("display")
         self._poll_logs()
+        # Start breathe animation for both dots at their initial red color
+        self.after(100, lambda: self._start_breathe(self._lol_dot, RED))
+        self.after(150, lambda: self._start_breathe(self._discord_dot, RED))
 
     # Layout
 
@@ -149,9 +153,19 @@ class SettingsWindow(ctk.CTk):
         row = ctk.CTkFrame(hdr, fg_color="transparent")
         row.pack(fill="x", padx=20, pady=(14, 0))
 
-        # Status indicators — packed first (side="right") so they anchor to the right edge
+        # Status indicators + bug button — all anchored to the right edge
         sf = ctk.CTkFrame(row, fg_color="transparent")
         sf.pack(side="right")
+
+        # Discord status
+        self._discord_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=15), text_color=RED)
+        self._discord_dot.pack(side="left", padx=(0, 4))
+        self._discord_lbl = ctk.CTkLabel(
+            sf, text="Discord",
+            font=ctk.CTkFont(family=FONT_UI, size=15),
+            text_color=MUTED,
+        )
+        self._discord_lbl.pack(side="left", padx=(0, 16))
 
         # LoL status
         self._lol_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=15), text_color=RED)
@@ -163,15 +177,17 @@ class SettingsWindow(ctk.CTk):
         )
         self._lol_lbl.pack(side="left", padx=(0, 16))
 
-        # Discord status
-        self._discord_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=15), text_color=RED)
-        self._discord_dot.pack(side="left", padx=(0, 4))
-        self._discord_lbl = ctk.CTkLabel(
-            sf, text="Discord",
-            font=ctk.CTkFont(family=FONT_UI, size=15),
-            text_color=MUTED,
+        # Bug report button — rightmost
+        import os as _os
+        from PIL import Image as _Image
+        _bug_path = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), "assets", "78946.png")
+        _bug_img = ctk.CTkImage(_Image.open(_bug_path), size=(16, 16))
+        bug_btn = ctk.CTkLabel(
+            sf, text="", image=_bug_img,
+            cursor="hand2",
         )
-        self._discord_lbl.pack(side="left")
+        bug_btn.pack(side="left")
+        bug_btn.bind("<Button-1>", lambda _e: __import__("webbrowser").open("https://github.com/Katlicia/LOLCustomRPC/issues/new"))
 
         ctk.CTkLabel(
             row, text="LoLCustomRPC",
@@ -182,9 +198,10 @@ class SettingsWindow(ctk.CTk):
         # Tab buttons immediately right of title
         self._nav_btns: dict[str, ctk.CTkButton] = {}
         nav = [
-            ("display", "Display"),
-            ("general", "General"),
-            ("about",   "About"),
+            ("display",  "Display"),
+            ("general",  "General"),
+            ("updates",  "Updates"),
+            ("about",    "About"),
         ]
         for key, label in nav:
             btn = ctk.CTkButton(
@@ -215,6 +232,7 @@ class SettingsWindow(ctk.CTk):
         self._panels: dict[str, ctk.CTkFrame] = {
             "display": self._make_display_panel(),
             "general": self._make_general_panel(),
+            "updates": self._make_updates_panel(),
             "about":   self._make_about_panel(),
         }
 
@@ -333,6 +351,13 @@ class SettingsWindow(ctk.CTk):
         )
         self._kda_row.pack(fill="x", pady=4)
 
+        self._role_row = ToggleRow(
+            sec3.body, label="Show Role",
+            default=self._config.get("display.show_role", True),
+            on_change=self._on_role_changed,
+        )
+        self._role_row.pack(fill="x", pady=4)
+
         ctk.CTkFrame(left, height=1, fg_color=BORDER).pack(fill="x", pady=(2, 10))
 
         # Language section
@@ -416,6 +441,7 @@ class SettingsWindow(ctk.CTk):
         self._preview.set_rank_visible(self._config.get("display.show_rank", True))
         self._preview.set_level_visible(self._config.get("display.show_level", True))
         self._preview.set_kda_visible(self._config.get("display.show_kda", True))
+        self._preview.set_role_visible(self._config.get("display.show_role", True))
 
         # Log strip — spans bottom of both columns
         log_strip = ctk.CTkFrame(panel, fg_color=SURFACE, corner_radius=0, height=200)
@@ -477,6 +503,71 @@ class SettingsWindow(ctk.CTk):
         )
         self._minimized_row.pack(fill="x", pady=4)
 
+        ctk.CTkFrame(content, height=1, fg_color=BORDER).pack(fill="x", pady=(6, 10))
+
+        sec_upd = CollapsibleSection(content, "Updates", expanded=True)
+        sec_upd.pack(fill="x", pady=(0, 8))
+
+        self._auto_update_row = ToggleRow(
+            sec_upd.body, label="Auto update",
+            sub_label="Download and install updates automatically.",
+            default=self._config.get("general.auto_update", True),
+            on_change=self._on_auto_update_changed,
+        )
+        self._auto_update_row.pack(fill="x", pady=4)
+
+        return panel
+
+    def _make_updates_panel(self) -> ctk.CTkFrame:
+        panel = ctk.CTkFrame(self._main, fg_color="transparent")
+        content = ctk.CTkFrame(panel, fg_color="transparent")
+        content.pack(expand=True)
+
+        ctk.CTkLabel(
+            content, text="Updates",
+            font=ctk.CTkFont(family=FONT_UI, size=26, weight="bold"),
+            text_color=WHITE,
+        ).pack(pady=(40, 4))
+
+        version_text = f"Current version: v{self._app_version}" if self._app_version else "v1.0.0"
+        ctk.CTkLabel(
+            content, text=version_text,
+            font=ctk.CTkFont(family=FONT_UI, size=14),
+            text_color=MUTED2,
+        ).pack(pady=(0, 20))
+
+        self._update_btn = ctk.CTkButton(
+            content, text="Check for Updates",
+            width=180, height=36,
+            fg_color=CARD, hover_color=BORDER2,
+            border_width=1, border_color=BORDER2,
+            text_color=WHITE,
+            font=ctk.CTkFont(family=FONT_UI, size=14),
+            command=self._on_check_update,
+        )
+        self._update_btn.pack(pady=(0, 8))
+
+        self._update_label = ctk.CTkLabel(
+            content, text="",
+            font=ctk.CTkFont(family=FONT_UI, size=13),
+            text_color=MUTED,
+        )
+        self._update_label.pack()
+
+        self._notes_box = ctk.CTkTextbox(
+            content,
+            width=420, height=120,
+            fg_color=SURFACE,
+            border_color=BORDER,
+            border_width=1,
+            text_color=MUTED,
+            font=ctk.CTkFont(family=FONT_UI, size=13),
+            wrap="word",
+            state="disabled",
+        )
+        self._notes_box.pack(pady=(10, 0))
+        self._notes_box.pack_forget()
+
         return panel
 
     def _make_about_panel(self) -> ctk.CTkFrame:
@@ -494,21 +585,138 @@ class SettingsWindow(ctk.CTk):
             text_color=MUTED,
         ).pack()
 
+        version_text = f"v{self._app_version}" if self._app_version else "v1.0.0"
         ctk.CTkLabel(
-            panel, text="v1.0.0",
+            panel, text=version_text,
             font=ctk.CTkFont(family=FONT_UI, size=15),
             text_color=MUTED2,
         ).pack(pady=(4, 20))
 
         ctk.CTkFrame(panel, height=1, width=200, fg_color=BORDER).pack()
 
-        ctk.CTkLabel(
-            panel, text="github.com/LoL-RPC-Custom",
+        link = ctk.CTkLabel(
+            panel, text="https://github.com/Katlicia/LOLCustomRPC",
             font=ctk.CTkFont(family=FONT_UI, size=16),
             text_color=ACCENT,
-        ).pack(pady=16)
+            cursor="hand2",
+        )
+        link.pack(pady=16)
+        link.bind("<Button-1>", lambda _e: __import__("webbrowser").open("https://github.com/Katlicia/LOLCustomRPC"))
 
         return panel
+
+    def _show_update_notes(self, info) -> None:
+        """Fill and reveal the release notes box."""
+        notes = info.notes.strip() if info.notes else ""
+        if not notes:
+            self._notes_box.pack_forget()
+            return
+        self._notes_box.configure(state="normal")
+        self._notes_box.delete("1.0", "end")
+        self._notes_box.insert("end", f"What's new in v{info.version}:\n\n{notes}")
+        self._notes_box.configure(state="disabled")
+        self._notes_box.pack(pady=(10, 0))
+
+    def notify_update(self, info) -> None:
+        """Called from background thread when a new version is found at startup."""
+        auto = self._config.get("general.auto_update", True)
+
+        def _do():
+            # Mark the Updates tab button so user notices without opening it
+            self._nav_btns["updates"].configure(text="Updates ●", text_color="#4ade80")
+
+            self._show_update_notes(info)
+
+            if auto:
+                self._update_label.configure(
+                    text=f"v{info.version} available!",
+                    text_color="#4ade80",
+                )
+                self._update_btn.configure(
+                    text=f"Install v{info.version}",
+                    fg_color=ACCENT, hover_color=ACCENT_DIM,
+                    command=lambda: self._on_install_update(info),
+                )
+            else:
+                self._update_label.configure(
+                    text=f"v{info.version} available — auto update is off.",
+                    text_color="#facc15",
+                )
+                self._update_btn.configure(
+                    text=f"Download v{info.version}",
+                    fg_color=CARD, hover_color=BORDER2,
+                    command=lambda: self._on_install_update(info),
+                )
+        self.after(0, _do)
+
+    def _on_check_update(self) -> None:
+        from services.updater import check_for_update
+        self._update_btn.configure(text="Checking...", state="disabled")
+        self._update_label.configure(text="", text_color=MUTED)
+        self._notes_box.pack_forget()
+
+        def _run():
+            info = check_for_update(self._app_version or "0.0.0")
+            def _done():
+                self._update_btn.configure(state="normal")
+                if info:
+                    self._update_label.configure(
+                        text=f"v{info.version} available!",
+                        text_color="#4ade80",
+                    )
+                    self._update_btn.configure(
+                        text=f"Download v{info.version}",
+                        fg_color=ACCENT, hover_color=ACCENT_DIM,
+                        command=lambda: self._on_install_update(info),
+                    )
+                    self._show_update_notes(info)
+                else:
+                    self._update_label.configure(text="You're up to date.", text_color=MUTED)
+                    self._update_btn.configure(text="Check for Updates", fg_color=CARD, hover_color=BORDER2)
+            self.after(0, _done)
+
+        import threading
+        threading.Thread(target=_run, daemon=True).start()
+
+    def _on_install_update(self, info) -> None:
+        import webbrowser, sys
+        from tkinter import messagebox
+        from services.updater import download_and_install
+
+        # Source mode: open browser, no local install possible
+        if not getattr(sys, "frozen", False):
+            webbrowser.open(info.release_url)
+            return
+
+        auto = self._config.get("general.auto_update", True)
+        if auto:
+            msg = (
+                f"v{info.version} is ready to install.\n\n"
+                f"The app will restart after the update.\n"
+                f"Continue?"
+            )
+        else:
+            msg = (
+                f"v{info.version} is available.\n\n"
+                f"Auto update is off — do you want to install it now?\n"
+                f"The app will restart after the update."
+            )
+
+        if not messagebox.askyesno("Update", msg, parent=self):
+            return
+
+        self._update_btn.configure(text="Downloading... 0%", state="disabled")
+
+        def _progress(pct: int):
+            self.after(0, lambda: self._update_btn.configure(text=f"Downloading... {pct}%"))
+
+        def _error(msg: str):
+            self.after(0, lambda: [
+                self._update_btn.configure(text="Download failed", state="normal"),
+                self._update_label.configure(text=msg, text_color="#f87171"),
+            ])
+
+        download_and_install(info, on_progress=_progress, on_error=_error)
 
     # Navigation
 
@@ -565,6 +773,15 @@ class SettingsWindow(ctk.CTk):
         logger.info(f"Setting: show_kda = {v}")
         self._mark("display.show_kda", v)
         self._preview.set_kda_visible(v)
+
+    def _on_role_changed(self, v: bool):
+        logger.info(f"Setting: show_role = {v}")
+        self._mark("display.show_role", v)
+        self._preview.set_role_visible(v)
+
+    def _on_auto_update_changed(self, v: bool):
+        logger.info(f"Setting: auto_update = {v}")
+        self._mark("general.auto_update", v)
 
     def _on_autostart_changed(self, v: bool):
         logger.info(f"Setting: autostart = {v}")
@@ -648,10 +865,14 @@ class SettingsWindow(ctk.CTk):
             self._level_row.set(self._config.get("display.show_level", True))
             if hasattr(self, "_kda_row"):
                 self._kda_row.set(self._config.get("display.show_kda", True))
+            if hasattr(self, "_role_row"):
+                self._role_row.set(self._config.get("display.show_role", True))
             self._tag_row.set_enabled(self._nick_row.get())
         if hasattr(self, "_autostart_row"):
             self._autostart_row.set(self._config.get("general.autostart", True))
             self._minimized_row.set(self._config.get("general.start_minimized", True))
+            if hasattr(self, "_auto_update_row"):
+                self._auto_update_row.set(self._config.get("general.auto_update", True))
         if hasattr(self, "_logo_var"):
             self._logo_var.set(self._config.get("display.logo", "lol_logo"))
             self._preview.set_logo(self._logo_var.get())
@@ -662,6 +883,8 @@ class SettingsWindow(ctk.CTk):
             self._preview.set_level_visible(self._level_row.get())
             if hasattr(self, "_kda_row"):
                 self._preview.set_kda_visible(self._kda_row.get())
+            if hasattr(self, "_role_row"):
+                self._preview.set_role_visible(self._role_row.get())
         if hasattr(self, "_lang_menu"):
             self._lang_menu.set(
                 self._code_to_lang_label(self._config.get("general.language", "auto"))
@@ -669,13 +892,52 @@ class SettingsWindow(ctk.CTk):
 
     # Status
 
+    def _start_breathe(self, dot: ctk.CTkLabel, base_hex: str):
+        """Continuously breathe (fade in/out) a dot using its current base color."""
+        import math
+
+        def _hex_to_rgb(h: str):
+            h = h.lstrip("#")
+            return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+        def _rgb_to_hex(r, g, b):
+            return f"#{int(r):02x}{int(g):02x}{int(b):02x}"
+
+        br, bg_, bb = _hex_to_rgb(base_hex)
+        DIM = 0.3
+        PERIOD_MS = 2000
+        STEP_MS = 40
+
+        # Each call gets a unique token; old loops see a stale token and stop
+        token = object()
+        dot._breathe_token = token
+
+        def _tick(t: int):
+            if not dot.winfo_exists():
+                return
+            if getattr(dot, "_breathe_token", None) is not token:
+                return
+            alpha = (1 - math.cos(2 * math.pi * t / PERIOD_MS)) / 2
+            brightness = DIM + (1 - DIM) * alpha
+            color = _rgb_to_hex(br * brightness, bg_ * brightness, bb * brightness)
+            dot.configure(text_color=color)
+            dot.after(STEP_MS, lambda: _tick((t + STEP_MS) % PERIOD_MS))
+
+        _tick(0)
+
     def set_discord_status(self, connected: bool):
-        if hasattr(self, "_discord_dot"):
-            self._discord_dot.configure(text_color=GREEN if connected else RED)
+        if not hasattr(self, "_discord_dot"):
+            return
+        color = GREEN if connected else RED
+        self._discord_dot.configure(text_color=color)
+        self._start_breathe(self._discord_dot, color)
 
     def set_lol_status(self, connected: bool):
-        if hasattr(self, "_lol_dot"):
-            self._lol_dot.configure(text_color=GREEN if connected else RED)
+        if not hasattr(self, "_lol_dot"):
+            return
+        color = GREEN if connected else RED
+        self._lol_dot.configure(text_color=color)
+        self._start_breathe(self._lol_dot, color)
 
     # Log polling
 
