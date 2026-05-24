@@ -212,6 +212,14 @@ class DDragon:
                     "load": _asset_path_to_url(skin.get("loadScreenPath", "")),
                 }
                 self._skin_paths_cache[(champion_id, skin_index)] = paths
+                # Map every chroma ID back to the parent skin's paths so that
+                # chroma selections (Live API returns the chroma's own ID) still
+                # display the parent skin image instead of falling through to the logo.
+                for chroma in skin.get("chromas", []):
+                    chroma_full_id = chroma.get("id", 0)
+                    if chroma_full_id > 0:
+                        chroma_index = chroma_full_id - (champion_id * 1000) if chroma_full_id >= champion_id * 1000 else chroma_full_id
+                        self._skin_paths_cache[(champion_id, chroma_index)] = paths
             self._champion_skins_loaded.add(champion_id)
             logger.info(f"Champion {champion_id} skins loaded: {len([k for k in self._skin_paths_cache if k[0]==champion_id])} skins")
             return True
