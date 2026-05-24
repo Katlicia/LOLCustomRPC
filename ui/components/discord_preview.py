@@ -119,6 +119,7 @@ class DiscordPreview(ctk.CTkFrame):
         self._show_rank  = True
         self._show_level = True
         self._show_kda   = True
+        self._show_role  = True
 
         # CTkImage refs — must be kept alive to prevent GC
         self._large_ctk: Optional[ctk.CTkImage] = None
@@ -226,6 +227,10 @@ class DiscordPreview(ctk.CTkFrame):
         self._show_kda = v
         self._refresh()
 
+    def set_role_visible(self, v: bool):
+        self._show_role = v
+        self._refresh()
+
     def set_translator(self, t: "Translator"):
         self._t = t
         self._refresh()
@@ -247,11 +252,11 @@ class DiscordPreview(ctk.CTkFrame):
         # State text
         if self._state_key == "In Game":
             kda  = dummy.get("kda", "")
-            role = self._t_(f"role_{dummy.get('role', 'top').lower()}")
+            role = self._t_(f"role_{dummy.get('role', 'top').lower()}") if self._show_role else ""
             if self._show_kda and kda:
                 state_text = self._t_("kda_with_role", k=5, d=2, a=3, role=role) if role else self._t_("kda_format", k=5, d=2, a=3)
             else:
-                state_text = role
+                state_text = role or ""
             details_text = f"Gwen - {self._t_('queue_solo_duo')}"
         elif self._state_key == "Main Menu":
             parts = []
