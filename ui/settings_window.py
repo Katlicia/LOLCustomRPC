@@ -111,7 +111,10 @@ class SettingsWindow(ctk.CTk):
         self._active = "display"
 
         self.title("LoLCustomRPC")
-        self.geometry("1120x760")
+        w, h = 1120, 760
+        sw = self.winfo_screenwidth()
+        sh = self.winfo_screenheight()
+        self.geometry(f"{w}x{h}+{(sw - w) // 2}+{(sh - h) // 2}")
         import os as _os
         _ico = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), "assets", "winicon.ico")
         if _os.path.exists(_ico):
@@ -175,21 +178,21 @@ class SettingsWindow(ctk.CTk):
         sf.pack(side="right")
 
         # Discord status
-        self._discord_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=13), text_color=RED)
+        self._discord_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=15), text_color=RED)
         self._discord_dot.pack(side="left", padx=(0, 4))
         self._discord_lbl = ctk.CTkLabel(
             sf, text="Discord",
-            font=ctk.CTkFont(family=FONT_UI, size=13),
+            font=ctk.CTkFont(family=FONT_UI, size=15),
             text_color=MUTED,
         )
         self._discord_lbl.pack(side="left", padx=(0, 12))
 
         # LoL status
-        self._lol_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=13), text_color=RED)
+        self._lol_dot = ctk.CTkLabel(sf, text="●", font=ctk.CTkFont(size=15), text_color=RED)
         self._lol_dot.pack(side="left", padx=(0, 4))
         self._lol_lbl = ctk.CTkLabel(
             sf, text="LoL",
-            font=ctk.CTkFont(family=FONT_UI, size=13),
+            font=ctk.CTkFont(family=FONT_UI, size=15),
             text_color=MUTED,
         )
         self._lol_lbl.pack(side="left", padx=(0, 12))
@@ -249,6 +252,12 @@ class SettingsWindow(ctk.CTk):
         ft.grid(row=2, column=0, sticky="ew")
         ft.grid_propagate(False)
         ctk.CTkFrame(ft, height=1, fg_color=BORDER).pack(fill="x", side="top")
+
+        ctk.CTkLabel(
+            ft, text=f"Version - {self._app_version}",
+            font=ctk.CTkFont(family=FONT_UI, size=16),
+            text_color=MUTED2,
+        ).pack(side="left", padx=20, pady=12)
 
         bf = ctk.CTkFrame(ft, fg_color="transparent")
         bf.pack(side="right", padx=20, pady=12)
