@@ -1,12 +1,11 @@
 .env
+_client_id.py
 todo.txt
 PLANNING.md
 CONTEXT.md
 
 dist/
 build/
-
-LoLCustomRPC.spec
 
 __pycache__/
 
