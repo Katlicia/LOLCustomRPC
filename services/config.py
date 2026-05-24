@@ -32,6 +32,7 @@ DEFAULTS: Dict[str, Any] = {
         "language": "auto",       # "auto" = follow LoL client locale
         "autostart": True,        # start with Windows
         "start_minimized": True,  # go straight to tray on launch
+        "auto_update": True,      # automatically download and install updates
     },
     "display": {
         "show_nick": True,
