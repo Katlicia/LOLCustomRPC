@@ -124,10 +124,14 @@ def download_and_install(
             if on_progress:
                 on_progress(100)
 
+            # Get file path
+            exe_dir = os.path.dirname(current_exe)
+
             # Write a tiny batch script to update
             pid = os.getpid()
             script = (
                 f"@echo off\n"
+                f"cd /d \"{exe_dir}\"\n"
                 f":retry\n"
                 f"timeout /t 1 /nobreak >NUL\n"
                 f"copy /y \"{tmp_path}\" \"{current_exe}\" >NUL\n"
@@ -140,7 +144,14 @@ def download_and_install(
             with os.fdopen(bat_fd, "w") as f:
                 f.write(script)
 
-            ctypes.windll.shell32.ShellExecuteW(None, "open", "cmd.exe", f'/c "{bat_path}"', None, 0)
+            ctypes.windll.shell32.ShellExecuteW(
+                None, 
+                "open", 
+                "cmd.exe", 
+                f'/c "{bat_path}"', 
+                exe_dir, 
+                0
+            )
            
             os._exit(0)
 
