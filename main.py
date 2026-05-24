@@ -174,16 +174,24 @@ def main():
 
     def open_settings():
         if win_ref:
-            win_ref[0].after(0, win_ref[0].deiconify)
-            win_ref[0].after(0, win_ref[0].lift)
+            def _show():
+                w = win_ref[0]
+                w.deiconify()
+                w.lift()
+                w.focus_force()
+            win_ref[0].after(0, _show)
 
     def quit_app():
         stop_event.set()
         if win_ref:
             win_ref[0].after(0, win_ref[0].destroy)
 
+    def on_pause_changed(paused: bool):
+        if win_ref:
+            win_ref[0].after(0, win_ref[0].set_paused, paused)
+
     # Tray
-    tray = TrayIcon(on_open_settings=open_settings, on_quit=quit_app)
+    tray = TrayIcon(on_open_settings=open_settings, on_quit=quit_app, on_pause_changed=on_pause_changed)
     tray.start()
 
     # RPC loop in background thread
@@ -195,7 +203,13 @@ def main():
     rpc_thread.start()
 
     # Settings window — Tkinter must live on the main thread
-    win = SettingsWindow(config=config, translator=translator, app_version=APP_VERSION)
+    win = SettingsWindow(
+        config=config,
+        translator=translator,
+        app_version=APP_VERSION,
+        on_pause_toggle=tray.toggle_pause,
+        is_paused_fn=lambda: tray.is_paused,
+    )
     win_ref.append(win)
 
     # Background update check — notifies via win.notify_update on the main thread
