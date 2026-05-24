@@ -6,6 +6,7 @@ Flow:
   2. download_and_install(info) -> downloads new .exe, replaces current exe via helper script, restarts
 """
 
+import ctypes
 import logging
 import os
 import subprocess
@@ -105,7 +106,7 @@ def download_and_install(
 
     def _run():
         try:
-            tmp_fd, tmp_path = tempfile.mkstemp(suffix=".exe", prefix="lolrpc_update_")
+            tmp_fd, tmp_path = tempfile.mkstemp(suffix=".exe", prefix="lolrpc_new_")
             os.close(tmp_fd)
 
             # Download with streaming
@@ -135,16 +136,12 @@ def download_and_install(
                 f"start \"\" \"{current_exe}\"\n"
                 f"del \"%~f0\"\n"
             )
-            bat_fd, bat_path = tempfile.mkstemp(suffix=".bat", prefix="lolrpc_upd_")
+            bat_fd, bat_path = tempfile.mkstemp(suffix=".bat", prefix="lolrpc_script_")
             with os.fdopen(bat_fd, "w") as f:
                 f.write(script)
 
-            subprocess.Popen(
-                ["cmd.exe", "/c", bat_path],
-                creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP,
-                close_fds=True,
-            )
-            # Exit so the batch script can overwrite us
+            ctypes.windll.shell32.ShellExecuteW(None, "open", "cmd.exe", f'/c "{bat_path}"', None, 0)
+           
             os._exit(0)
 
         except Exception as e:
