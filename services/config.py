@@ -39,6 +39,7 @@ DEFAULTS: Dict[str, Any] = {
         "show_rank": True,
         "show_level": True,
         "show_kda": True,
+        "show_role": True,
         "logo": "lol_logo",  # "lol_logo" or "lol_legacy_logo"
     },
 }
