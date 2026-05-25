@@ -59,7 +59,10 @@ QUEUE_KEYS = {
     1300: "queue_nexus_blitz",
     1400: "queue_spellbook",
     1700: "queue_arena",
+    1710: "queue_arena",
+    1750: "queue_arena",
     1900: "queue_urf",
+    2400: "queue_mayhem",
 }
 
 # Game mode -> translation key
