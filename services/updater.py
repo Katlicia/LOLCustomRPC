@@ -155,10 +155,7 @@ def download_and_install(
                 f"    goto copy\n"
                 f")\n"
                 f"del \"{tmp_path}\" >NUL 2>NUL\n"
-                f"schtasks /create /tn \"LolRPCRestart\" /tr \"\\\"{current_exe}\\\"\" /sc once /st 00:00 /f >NUL 2>NUL\n"
-                f"schtasks /run /tn \"LolRPCRestart\" >NUL 2>NUL\n"
-                f"timeout /t 3 /nobreak >NUL\n"
-                f"schtasks /delete /tn \"LolRPCRestart\" /f >NUL 2>NUL\n"
+                f"start \"\" \"{current_exe}\"\n"
                 f"del \"%~f0\"\n"
             )
             bat_fd, bat_path = tempfile.mkstemp(suffix=".bat", prefix="lolrpc_upd_")
