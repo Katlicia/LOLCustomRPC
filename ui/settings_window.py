@@ -611,6 +611,9 @@ class SettingsWindow(ctk.CTk):
         self._notes_box.pack(pady=(10, 0))
         self._notes_box.pack_forget()
 
+        # Fetch latest release notes in background on panel creation
+        self._fetch_latest_notes()
+
         return panel
 
     def _make_about_panel(self) -> ctk.CTkFrame:
@@ -666,6 +669,28 @@ class SettingsWindow(ctk.CTk):
         self._notes_box.configure(state="disabled")
         self._notes_box.pack(pady=(10, 0))
 
+    def _fetch_latest_notes(self) -> None:
+        """Fetch the latest release notes from GitHub and always show them."""
+        import threading
+        from services.updater import check_for_update, _parse_version
+
+        def _run():
+            info = check_for_update("0.0.0")  # version 0.0.0 ensures latest is always returned
+            if info:
+                def _show():
+                    self._show_update_notes(info)
+                    # Set label only if no other check has filled it yet
+                    if not self._update_label.cget("text"):
+                        up_to_date = _parse_version(info.version) <= _parse_version(self._app_version or "0.0.0")
+                        if up_to_date:
+                            self._update_label.configure(
+                                text=f"You're on the latest version (v{self._app_version}).",
+                                text_color=MUTED,
+                            )
+                self.after(0, _show)
+
+        threading.Thread(target=_run, daemon=True).start()
+
     def notify_update(self, info) -> None:
         """Called from background thread when a new version is found at startup."""
         auto = self._config.get("general.auto_update", True)
@@ -678,14 +703,16 @@ class SettingsWindow(ctk.CTk):
 
             if auto:
                 self._update_label.configure(
-                    text=f"v{info.version} available!",
+                    text=f"v{info.version} available — installing...",
                     text_color="#4ade80",
                 )
                 self._update_btn.configure(
-                    text=f"Install v{info.version}",
+                    text=f"Installing v{info.version}...",
                     fg_color=ACCENT, hover_color=ACCENT_DIM,
+                    state="disabled",
                     command=lambda: self._on_install_update(info),
                 )
+                self._on_install_update(info)
             else:
                 self._update_label.configure(
                     text=f"v{info.version} available — auto update is off.",
@@ -738,22 +765,19 @@ class SettingsWindow(ctk.CTk):
             return
 
         auto = self._config.get("general.auto_update", True)
-        if auto:
-            msg = (
-                f"v{info.version} is ready to install.\n\n"
-                f"The app will restart after the update.\n"
-                f"Don't forget to relaunch League of Legends.\n"
-                f"Continue?"
-            )
-        else:
+        if not auto:
             msg = (
                 f"v{info.version} is available.\n\n"
                 f"Auto update is off — do you want to install it now?\n"
                 f"The app will restart after the update."
             )
-
-        if not messagebox.askyesno("Update", msg, parent=self):
-            return
+            if not messagebox.askyesno("Update", msg, parent=self):
+                self._update_btn.configure(
+                    text=f"Download v{info.version}",
+                    fg_color=CARD, hover_color=BORDER2,
+                    state="normal",
+                )
+                return
 
         self._update_btn.configure(text="Downloading... 0%", state="disabled")
 
