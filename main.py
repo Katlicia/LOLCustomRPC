@@ -119,14 +119,17 @@ def rpc_loop(
 
 # Main
 def main():
-    # Mutex control
+    # Single-instance: mutex + named event for "show window" signal
     mutex_name = "LoLCustomRPC_SingleInstance_Lock"
+    event_name = "LoLCustomRPC_ShowWindow"
 
+    show_event = ctypes.windll.kernel32.CreateEventW(None, False, False, event_name)
     mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
 
     if ctypes.windll.kernel32.GetLastError() == 183:
-            print("Another instance is already running. Exiting.")
-            sys.exit(0)
+        # Another instance is running — signal it to show its window
+        ctypes.windll.kernel32.SetEvent(show_event)
+        sys.exit(0)
 
     setup_logging()
     logger = logging.getLogger("main")
@@ -189,6 +192,15 @@ def main():
     def on_pause_changed(paused: bool):
         if win_ref:
             win_ref[0].after(0, win_ref[0].set_paused, paused)
+
+    # Listen for "show window" signals from new instances that find the mutex taken
+    def _watch_show_event():
+        while not stop_event.is_set():
+            result = ctypes.windll.kernel32.WaitForSingleObject(show_event, 500)
+            if result == 0:  # WAIT_OBJECT_0 — event was set
+                open_settings()
+
+    threading.Thread(target=_watch_show_event, daemon=True).start()
 
     # Tray
     tray = TrayIcon(on_open_settings=open_settings, on_quit=quit_app, on_pause_changed=on_pause_changed)
