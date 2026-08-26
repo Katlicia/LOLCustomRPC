@@ -4,7 +4,7 @@
 
   "in_main_menu": "Κύριο Μενού",
   "in_lobby": "Στο Lobby - {queue}",
-  "in_lobby_party": "Στο Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "Στο Lobby - {queue} ({size}/{max})",
   "in_queue": "Σε Ουρά - {queue}",
   "picking_champion": "Επιλογή Πρωταγωνιστή",
   "in_match": "Σε Αγώνα",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Βιβλίο Ξόρκων",
   "queue_arena": "Αρένα",
   "queue_mayhem": "ARAM: Χαμός",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Προσαρμοσμένο",
 
   "mode_classic": "Χαράδρα Των Επιφωνητών",

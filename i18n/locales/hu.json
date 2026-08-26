@@ -4,7 +4,7 @@
 
   "in_main_menu": "Főmenü",
   "in_lobby": "A Lobbiban - {queue}",
-  "in_lobby_party": "A Lobbiban - {queue} ({size}/5)",
+  "in_lobby_party": "A Lobbiban - {queue} ({size}/{max})",
   "in_queue": "Sorban - {queue}",
   "picking_champion": "Bajnok Kiválasztása",
   "in_match": "Meccsen",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Varázslókönyv",
   "queue_arena": "Aréna",
   "queue_mayhem": "ARAM: Káosz",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Egyéni",
 
   "mode_classic": "Idézők Szurdoka",

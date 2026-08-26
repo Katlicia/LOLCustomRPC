@@ -4,7 +4,7 @@
 
   "in_main_menu": "Main Menu",
   "in_lobby": "In Lobby - {queue}",
-  "in_lobby_party": "In Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "In Lobby - {queue} ({size}/{max})",
   "in_queue": "In Queue - {queue}",
   "picking_champion": "Picking Champion",
   "in_match": "In Match",
@@ -41,6 +41,7 @@
   "queue_spellbook": "Spellbook",
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Mayhem",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Custom",
 
   "mode_classic": "Summoner's Rift",

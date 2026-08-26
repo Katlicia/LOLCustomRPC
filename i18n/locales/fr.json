@@ -4,7 +4,7 @@
 
   "in_main_menu": "Menu Principal",
   "in_lobby": "En Lobby - {queue}",
-  "in_lobby_party": "En Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "En Lobby - {queue} ({size}/{max})",
   "in_queue": "En File D'Attente - {queue}",
   "picking_champion": "Sélection Du Champion",
   "in_match": "En Partie",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Grimoire De Sorts",
   "queue_arena": "Arène",
   "queue_mayhem": "ARAM du chaos",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Personnalisé",
 
   "mode_classic": "Faille De L'Invocateur",

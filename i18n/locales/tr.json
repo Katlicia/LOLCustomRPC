@@ -4,7 +4,7 @@
 
   "in_main_menu": "Ana Menü",
   "in_lobby": "Lobide - {queue}",
-  "in_lobby_party": "Lobide - {queue} ({size}/5)",
+  "in_lobby_party": "Lobide - {queue} ({size}/{max})",
   "in_queue": "Sırada - {queue}",
   "picking_champion": "Şampiyon Seçiliyor",
   "in_match": "Maçta",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Büyü Kitabı",
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Şamata",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Özel",
 
   "mode_classic": "Summoner's Rift",

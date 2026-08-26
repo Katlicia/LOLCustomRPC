@@ -4,7 +4,7 @@
 
   "in_main_menu": "Menú Principal",
   "in_lobby": "En Lobby - {queue}",
-  "in_lobby_party": "En Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "En Lobby - {queue} ({size}/{max})",
   "in_queue": "En Cola - {queue}",
   "picking_champion": "Eligiendo Campeón",
   "in_match": "En Partida",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Libro De Hechizos",
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Caos",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Personalizada",
 
   "mode_classic": "Grieta Del Invocador",

@@ -4,7 +4,7 @@
 
   "in_main_menu": "Главное Меню",
   "in_lobby": "В Лобби - {queue}",
-  "in_lobby_party": "В Лобби - {queue} ({size}/5)",
+  "in_lobby_party": "В Лобби - {queue} ({size}/{max})",
   "in_queue": "В Очереди - {queue}",
   "picking_champion": "Выбор Чемпиона",
   "in_match": "В Игре",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Книга Заклинаний",
   "queue_arena": "Арена",
   "queue_mayhem": "ARAM: Хаос",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Пользовательская",
 
   "mode_classic": "Ущелье Призывателей",

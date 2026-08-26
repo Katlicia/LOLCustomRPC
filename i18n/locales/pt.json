@@ -4,7 +4,7 @@
 
   "in_main_menu": "Menu Principal",
   "in_lobby": "No Lobby - {queue}",
-  "in_lobby_party": "No Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "No Lobby - {queue} ({size}/{max})",
   "in_queue": "Na Fila - {queue}",
   "picking_champion": "Escolhendo Campeão",
   "in_match": "Em Partida",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Livro De Feitiços",
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Desordem",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Personalizada",
 
   "mode_classic": "Fenda Do Invocador",

@@ -4,7 +4,7 @@
 
   "in_main_menu": "Menu Chính",
   "in_lobby": "Trong Phòng Chờ - {queue}",
-  "in_lobby_party": "Trong Phòng Chờ - {queue} ({size}/5)",
+  "in_lobby_party": "Trong Phòng Chờ - {queue} ({size}/{max})",
   "in_queue": "Đang Xếp Hàng - {queue}",
   "picking_champion": "Đang Chọn Tướng",
   "in_match": "Đang Trong Trận",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Sách Phép",
   "queue_arena": "Đấu Trường",
   "queue_mayhem": "ARAM: Hỗn Loạn",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Tùy Chỉnh",
 
   "mode_classic": "Hẻm Của Những Người Triệu Hồi",

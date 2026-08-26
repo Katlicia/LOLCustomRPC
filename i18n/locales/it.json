@@ -4,7 +4,7 @@
 
   "in_main_menu": "Menu Principale",
   "in_lobby": "In Lobby - {queue}",
-  "in_lobby_party": "In Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "In Lobby - {queue} ({size}/{max})",
   "in_queue": "In Coda - {queue}",
   "picking_champion": "Scelta Del Campione",
   "in_match": "In Partita",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Libro Degli Incantesimi",
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Pandemonio",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Personalizzata",
 
   "mode_classic": "Landa Degli Evocatori",

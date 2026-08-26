@@ -4,7 +4,7 @@
 
   "in_main_menu": "Hauptmenü",
   "in_lobby": "In Der Lobby - {queue}",
-  "in_lobby_party": "In Der Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "In Der Lobby - {queue} ({size}/{max})",
   "in_queue": "In Der Warteschlange - {queue}",
   "picking_champion": "Champion Wird Gewählt",
   "in_match": "Im Spiel",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Zauberbuch",
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Chaos",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Benutzerdefiniert",
 
   "mode_classic": "Beschwörerschlucht",

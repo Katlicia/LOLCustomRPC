@@ -4,7 +4,7 @@
 
   "in_main_menu": "Menu Główne",
   "in_lobby": "W Lobby - {queue}",
-  "in_lobby_party": "W Lobby - {queue} ({size}/5)",
+  "in_lobby_party": "W Lobby - {queue} ({size}/{max})",
   "in_queue": "W Kolejce - {queue}",
   "picking_champion": "Wybieranie Bohatera",
   "in_match": "W Meczu",
@@ -52,6 +52,7 @@
   "queue_spellbook": "Księga Zaklęć",
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Chaos",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "Niestandardowa",
 
   "mode_classic": "Szczelina Przywoływacza",

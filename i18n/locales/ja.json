@@ -4,7 +4,7 @@
 
   "in_main_menu": "メインメニュー",
   "in_lobby": "ロビー - {queue}",
-  "in_lobby_party": "ロビー - {queue} ({size}/5)",
+  "in_lobby_party": "ロビー - {queue} ({size}/{max})",
   "in_queue": "マッチング中 - {queue}",
   "picking_champion": "チャンピオン選択中",
   "in_match": "試合中",
@@ -52,6 +52,7 @@
   "queue_spellbook": "スペルブック",
   "queue_arena": "アリーナ",
   "queue_mayhem": "ランダムミッド: メイヘム",
+  "queue_league_classic": "Classic Rift",
   "queue_custom": "カスタム",
 
   "mode_classic": "サモナーズリフト",
