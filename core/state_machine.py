@@ -64,6 +64,10 @@ QUEUE_KEYS = {
     1900: "queue_urf",
     2400: "queue_mayhem",
     4310: "queue_league_classic",
+    1090: "queue_tft_normal",
+    1100: "queue_tft_ranked",
+    1130: "queue_tft_hyper_roll",
+    1160: "queue_tft_double_up",
 }
 
 # Game mode -> translation key
