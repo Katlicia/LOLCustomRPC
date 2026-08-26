@@ -53,6 +53,10 @@
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Chaos",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Gewertet",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hyper Roll",
+  "queue_tft_double_up": "Teamfight Tactics: Double Up",
   "queue_custom": "Benutzerdefiniert",
 
   "mode_classic": "Beschwörerschlucht",

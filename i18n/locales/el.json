@@ -53,6 +53,10 @@
   "queue_arena": "Αρένα",
   "queue_mayhem": "ARAM: Χαμός",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Κατάταξης",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Υπερανανέωση",
+  "queue_tft_double_up": "Teamfight Tactics: Διπλή Βολή",
   "queue_custom": "Προσαρμοσμένο",
 
   "mode_classic": "Χαράδρα Των Επιφωνητών",

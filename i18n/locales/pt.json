@@ -53,6 +53,10 @@
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Desordem",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Ranqueada",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hyper Roll",
+  "queue_tft_double_up": "Teamfight Tactics: Duplas Dinâmicas",
   "queue_custom": "Personalizada",
 
   "mode_classic": "Fenda Do Invocador",

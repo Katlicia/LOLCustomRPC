@@ -53,6 +53,10 @@
   "queue_arena": "Aréna",
   "queue_mayhem": "ARAM: Káosz",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Rangsorolt",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Villámjáték",
+  "queue_tft_double_up": "Teamfight Tactics: Ketten együtt",
   "queue_custom": "Egyéni",
 
   "mode_classic": "Idézők Szurdoka",

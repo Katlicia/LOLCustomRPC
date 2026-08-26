@@ -42,6 +42,10 @@
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Mayhem",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics (Ranked)",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hyper Roll",
+  "queue_tft_double_up": "Teamfight Tactics: Double Up",
   "queue_custom": "Custom",
 
   "mode_classic": "Summoner's Rift",

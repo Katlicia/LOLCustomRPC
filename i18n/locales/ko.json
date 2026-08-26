@@ -53,6 +53,10 @@
   "queue_arena": "아레나",
   "queue_mayhem": "무작위 총력전: 아수라장",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "전략적 팀 전투",
+  "queue_tft_ranked": "전략적 팀 전투: 랭크",
+  "queue_tft_hyper_roll": "전략적 팀 전투: 초고속 모드",
+  "queue_tft_double_up": "전략적 팀 전투: 더블 업",
   "queue_custom": "커스텀",
 
   "mode_classic": "소환사의 협곡",

@@ -53,6 +53,10 @@
   "queue_arena": "Арена",
   "queue_mayhem": "ARAM: Хаос",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Рейтинговый",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Ва-банк",
+  "queue_tft_double_up": "Teamfight Tactics: Двойной удар",
   "queue_custom": "Пользовательская",
 
   "mode_classic": "Ущелье Призывателей",

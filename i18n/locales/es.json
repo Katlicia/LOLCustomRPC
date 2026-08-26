@@ -53,6 +53,10 @@
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Caos",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Clasificatoria",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hyper Roll",
+  "queue_tft_double_up": "Teamfight Tactics: Double Up",
   "queue_custom": "Personalizada",
 
   "mode_classic": "Grieta Del Invocador",

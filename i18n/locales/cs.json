@@ -53,6 +53,10 @@
   "queue_arena": "Aréna",
   "queue_mayhem": "ARAM: Mela",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Hodnocené",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hyper výběr",
+  "queue_tft_double_up": "Teamfight Tactics: Dvojice",
   "queue_custom": "Vlastní",
 
   "mode_classic": "Propast Přivolávačů",

@@ -53,6 +53,10 @@
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Pandemonio",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Classificata",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hyper Roll",
+  "queue_tft_double_up": "Teamfight Tactics: Double Up",
   "queue_custom": "Personalizzata",
 
   "mode_classic": "Landa Degli Evocatori",

@@ -53,6 +53,10 @@
   "queue_arena": "สนามประลอง",
   "queue_mayhem": "ARAM: Mayhem",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: แรงค์",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hyper Roll",
+  "queue_tft_double_up": "Teamfight Tactics: Double Up",
   "queue_custom": "กำหนดเอง",
 
   "mode_classic": "Summoner's Rift",

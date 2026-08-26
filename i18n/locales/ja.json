@@ -53,6 +53,10 @@
   "queue_arena": "アリーナ",
   "queue_mayhem": "ランダムミッド: メイヘム",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: ランク",
+  "queue_tft_hyper_roll": "Teamfight Tactics: ハイパーロール",
+  "queue_tft_double_up": "Teamfight Tactics: ダブルアップ",
   "queue_custom": "カスタム",
 
   "mode_classic": "サモナーズリフト",

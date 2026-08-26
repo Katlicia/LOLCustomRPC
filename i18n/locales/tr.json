@@ -53,6 +53,10 @@
   "queue_arena": "Arena",
   "queue_mayhem": "ARAM: Şamata",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Dereceli",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hiper Yenileme",
+  "queue_tft_double_up": "Teamfight Tactics: Muhteşem İkili",
   "queue_custom": "Özel",
 
   "mode_classic": "Summoner's Rift",

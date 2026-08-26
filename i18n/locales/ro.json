@@ -53,6 +53,10 @@
   "queue_arena": "Arenă",
   "queue_mayhem": "ARAM: Haos",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Clasate",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Hiper-reîncărcări",
+  "queue_tft_double_up": "Teamfight Tactics: La dublu",
   "queue_custom": "Personalizat",
 
   "mode_classic": "Prăpastia Invocatorilor",

@@ -53,6 +53,10 @@
   "queue_arena": "Đấu Trường",
   "queue_mayhem": "ARAM: Hỗn Loạn",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "Teamfight Tactics",
+  "queue_tft_ranked": "Teamfight Tactics: Xếp Hạng",
+  "queue_tft_hyper_roll": "Teamfight Tactics: Xúc Xắc Siêu Tốc",
+  "queue_tft_double_up": "Teamfight Tactics: Cặp Đôi Hoàn Hảo",
   "queue_custom": "Tùy Chỉnh",
 
   "mode_classic": "Hẻm Của Những Người Triệu Hồi",

@@ -53,6 +53,10 @@
   "queue_arena": "斗魂竞技场",
   "queue_mayhem": "海克斯大乱斗",
   "queue_league_classic": "Classic Rift",
+  "queue_tft_normal": "云顶之弈",
+  "queue_tft_ranked": "云顶之弈：排位",
+  "queue_tft_hyper_roll": "云顶之弈：狂暴模式",
+  "queue_tft_double_up": "云顶之弈：双人模式",
   "queue_custom": "自定义",
 
   "mode_classic": "召唤师峡谷",
