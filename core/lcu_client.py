@@ -196,3 +196,13 @@ class LCUClient:
         if isinstance(result, dict):
             return result.get("locale")
         return None
+
+    def get_queue_info(self, queue_id: int) -> Optional[dict]:
+        """
+        Live queue metadata for a queue ID (name, shortName, description,
+        numPlayersPerTeam, etc.). Used as a fallback when a queue ID isn't
+        in our static translation map yet (e.g. newly added game modes).
+        """
+        if not queue_id:
+            return None
+        return self.get(f"/lol-game-queues/v1/queues/{queue_id}")

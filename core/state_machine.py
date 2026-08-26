@@ -63,6 +63,7 @@ QUEUE_KEYS = {
     1750: "queue_arena",
     1900: "queue_urf",
     2400: "queue_mayhem",
+    4310: "queue_league_classic",
 }
 
 # Game mode -> translation key
@@ -152,6 +153,9 @@ class StateMachine:
         # Last known queue ID - cached from LCU lobby/champ-select so we can
         # still show the queue type during in-game (Live Client API doesn't give it)
         self._last_known_queue_id: int = 0
+        # Cache of queue_id -> live-fetched label for queues not in QUEUE_KEYS
+        # (e.g. brand-new game modes we haven't added a translation for yet)
+        self._queue_label_cache: dict[int, str] = {}
 
         # Locale auto-detection state
         self._locale_detected: bool = False
@@ -324,7 +328,8 @@ class StateMachine:
         party_size = len(members) if members else 1
 
         if party_size > 1:
-            details = self.t.t("in_lobby_party", queue=queue_label, size=party_size)
+            max_size = self._lobby_max_size(lobby)
+            details = self.t.t("in_lobby_party", queue=queue_label, size=party_size, max=max_size)
         else:
             details = self.t.t("in_lobby", queue=queue_label)
 
@@ -555,10 +560,41 @@ class StateMachine:
 
     # Localized lookups
 
+    def _lobby_max_size(self, lobby: dict) -> int:
+        """
+        Max party size for the current lobby's queue. Falls back to the lobby's own member count
+        so the "(size/max)" line never under-reports a full party.
+        """
+        game_config = lobby.get("gameConfig", {})
+        max_size = game_config.get("maxLobbySize")
+        if not max_size:
+            per_team = game_config.get("numPlayersPerTeam") or 0
+            teams = game_config.get("numberOfTeamsInLobby") or 1
+            max_size = per_team * teams
+        members = lobby.get("members", [])
+        return max(max_size or 0, len(members)) or 5
+
     def _queue_label(self, queue_id: int) -> str:
         key = QUEUE_KEYS.get(queue_id)
         if key:
             return self.t.t(key)
+        if not queue_id:
+            return self.t.t("queue_custom")
+
+        # Not in our static map yet (e.g. a newly added game mode) - ask the
+        # LCU for the live queue name instead of falling back to "Custom".
+        cached = self._queue_label_cache.get(queue_id)
+        if cached:
+            return cached
+
+        info = self.lcu.get_queue_info(queue_id)
+        if info:
+            label = info.get("shortName") or info.get("description") or ""
+            label = label.strip()
+            if label:
+                self._queue_label_cache[queue_id] = label
+                return label
+
         return self.t.t("queue_custom")
 
     def _mode_label(self, mode: str) -> str:
