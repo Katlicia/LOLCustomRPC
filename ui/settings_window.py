@@ -599,7 +599,7 @@ class SettingsWindow(ctk.CTk):
 
         self._notes_box = ctk.CTkTextbox(
             content,
-            width=420, height=120,
+            width=420, height=220,
             fg_color=SURFACE,
             border_color=BORDER,
             border_width=1,
