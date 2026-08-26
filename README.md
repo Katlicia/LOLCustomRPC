@@ -31,7 +31,7 @@ LoLCustomRPC is a fully customizable Discord Rich Presence client that shows you
 - Lobby & champion select detection
 - Rank display (Iron -> Challenger) with localized tier names
 - Summoner name, tag, and level display
-- 16 language support with official LoL localizations
+- 18 language support
 - Auto-update
 - Minimal system tray footprint
 - Start with Windows option
