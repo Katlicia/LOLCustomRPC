@@ -72,8 +72,6 @@ def check_for_update(current_version: str) -> Optional[UpdateInfo]:
         return None
 
     notes = (data.get("body") or "").strip()
-    if len(notes) > 300:
-        notes = notes[:297] + "..."
 
     return UpdateInfo(
         version=latest_tag.lstrip("v"),

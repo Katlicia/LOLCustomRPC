@@ -607,6 +607,8 @@ class SettingsWindow(ctk.CTk):
             font=ctk.CTkFont(family=FONT_UI, size=13),
             wrap="word",
             state="disabled",
+            scrollbar_button_color=BORDER2,
+            scrollbar_button_hover_color=ACCENT,
         )
         self._notes_box.pack(pady=(10, 0))
         self._notes_box.pack_forget()
