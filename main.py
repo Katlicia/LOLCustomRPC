@@ -86,10 +86,13 @@ def rpc_loop(
             payload = None
             if not tray.is_paused:
                 payload = sm.build_payload()
-                current_state = payload.state_name if payload else State.OFFLINE
+                # Use the actually-detected state (not "payload is None") so a
+                # display toggle that suppresses the payload (e.g. hide RPC in
+                # main menu) doesn't slow down polling or look like LoL closed.
+                current_state = sm.last_reported_state
                 rpc.update(payload)
 
-            lol_connected = payload is not None
+            lol_connected = current_state != State.OFFLINE
             discord_connected = rpc.connected
 
             tray.set_connected(discord_connected)
