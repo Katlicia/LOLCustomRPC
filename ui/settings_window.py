@@ -354,6 +354,14 @@ class SettingsWindow(ctk.CTk):
         )
         self._level_row.pack(fill="x", pady=4)
 
+        self._main_menu_row = ToggleRow(
+            sec2.body, label="Show status in main menu",
+            sub_label="Turn on the RPC while in menu",
+            default=self._config.get("display.show_main_menu", True),
+            on_change=self._on_main_menu_changed,
+        )
+        self._main_menu_row.pack(fill="x", pady=4)
+
         ctk.CTkFrame(left, height=1, fg_color=BORDER).pack(fill="x", pady=(2, 10))
 
         sec3 = CollapsibleSection(left, "In Game", expanded=True)
@@ -855,6 +863,10 @@ class SettingsWindow(ctk.CTk):
         self._mark("display.show_role", v)
         self._preview.set_role_visible(v)
 
+    def _on_main_menu_changed(self, v: bool):
+        logger.info(f"Setting: show_main_menu = {v}")
+        self._mark("display.show_main_menu", v)
+
     def _on_auto_update_changed(self, v: bool):
         logger.info(f"Setting: auto_update = {v}")
         self._mark("general.auto_update", v)
@@ -943,6 +955,8 @@ class SettingsWindow(ctk.CTk):
                 self._kda_row.set(self._config.get("display.show_kda", True))
             if hasattr(self, "_role_row"):
                 self._role_row.set(self._config.get("display.show_role", True))
+            if hasattr(self, "_main_menu_row"):
+                self._main_menu_row.set(self._config.get("display.show_main_menu", True))
             self._tag_row.set_enabled(self._nick_row.get())
         if hasattr(self, "_autostart_row"):
             self._autostart_row.set(self._config.get("general.autostart", True))
@@ -1072,8 +1086,8 @@ class SettingsWindow(ctk.CTk):
         msg = ( 
             "Welcome to LoLCustomRPC!\n\n"
             "IMPORTANT: For the application to detect your game correctly, "
-            "you must always start LoLCustomRPC BEFORE opening League of Legends.\n\n"
-            "If you open the app while the game is already running, it might will be overridden by League's official RPC.\n\n"
+            "you must start LoLCustomRPC BEFORE opening League of Legends.\n\n"
+            "If you open the app while the game is already running, it might be overridden by League's official RPC.\n\n"
             "Note: Since the app is set to start automatically with Windows, you only need "
             "to open it manually this first time (unless you turn off auto-start in Settings)."
         )

@@ -101,6 +101,7 @@ class DisplayOptions:
     show_level: bool = True
     show_kda: bool = True
     show_role: bool = True
+    show_main_menu: bool = True  # if False, RPC is cleared instead of showing "Main Menu"
     logo: str = "lol_logo"  # "lol_logo" or "lol_legacy_logo"
 
 
@@ -207,6 +208,7 @@ class StateMachine:
             show_level=config.get("display.show_level", True),
             show_kda=config.get("display.show_kda", True),
             show_role=config.get("display.show_role", True),
+            show_main_menu=config.get("display.show_main_menu", True),
             logo=config.get("display.logo", "lol_logo"),
         )
         logger.debug(f"Options reloaded: {self.options}")
@@ -230,6 +232,17 @@ class StateMachine:
         if phase is None:
             return State.OFFLINE
         return PHASE_TO_STATE.get(phase, State.MAIN_MENU)
+
+    @property
+    def last_reported_state(self) -> State:
+        """
+        The actually-detected game state, independent of display toggles
+        (e.g. still MAIN_MENU when show_main_menu=False suppresses the payload).
+        Callers should use this — not "payload is not None" — to know whether
+        LoL itself is connected, so poll cadence and status indicators stay
+        correct even when a state's RPC output is turned off.
+        """
+        return self._last_reported_state
 
     def build_payload(self) -> Optional[RPCPayload]:
         state = self.detect_state()
@@ -264,7 +277,7 @@ class StateMachine:
             elif state == State.POST_GAME:
                 payload = self._build_post_game()
             else:
-                payload = self._build_main_menu()
+                payload = self._build_main_menu() if self.options.show_main_menu else None
 
         if payload:
             self._apply_user_avatar(payload)
