@@ -260,7 +260,7 @@ class SettingsWindow(ctk.CTk):
         ).pack(side="left", padx=20, pady=12)
 
         self._stats_label = ctk.CTkLabel(
-            ft, text="",
+            ft, text="Loading stats...",
             font=ctk.CTkFont(family=FONT_UI, size=15),
             text_color=MUTED,
         )
@@ -676,36 +676,39 @@ class SettingsWindow(ctk.CTk):
         return panel
 
     STATS_REFRESH_INTERVAL_MS = 60_000  # re-check every 60s so numbers stay live
+    STATS_RETRY_INTERVAL_MS = 200       # retry almost immediately after a failed fetch (cold start, timeout, etc.)
 
     def _fetch_usage_stats(self) -> None:
         """
         Fetch live user count + total installs in the background (best-effort).
         Reschedules itself every STATS_REFRESH_INTERVAL_MS for as long as the
-        app is running — it just skips the actual network call while the
-        window is hidden (withdrawn to tray), so numbers are fresh again the
-        moment the window is shown.
+        app is running. On failure (cold start, timeout, etc.) it retries
+        almost immediately instead of leaving the label blank for a minute.
         """
         import threading
         from services.stats import fetch_stats
 
-        if self.winfo_viewable():
-            def _run():
-                data = fetch_stats()
-                if not data:
-                    return
+        # Note: don't gate this on winfo_viewable() — during __init__ (the
+        # very first call) the window hasn't been mapped to the screen yet,
+        # so it would always read False here and skip straight to a 60s wait
+        # with no request ever sent. The window-visibility check only makes
+        # sense for the periodic re-fetches, not the initial one.
+        def _run():
+            data = fetch_stats()
+            next_delay = self.STATS_REFRESH_INTERVAL_MS if data else self.STATS_RETRY_INTERVAL_MS
 
-                def _show():
+            def _show():
+                if data:
                     online = data.get("online", 0)
                     total = data.get("total_installs", 0)
                     self._stats_label.configure(
                         text=f"Active Users: {online:,} | Total Downloads: {total:,}"
                     )
-                self.after(0, _show)
+                self.after(next_delay, self._fetch_usage_stats)
 
-            threading.Thread(target=_run, daemon=True).start()
+            self.after(0, _show)
 
-        self.after(self.STATS_REFRESH_INTERVAL_MS, self._fetch_usage_stats)
-        self.after(self.STATS_REFRESH_INTERVAL_MS, self._fetch_usage_stats)
+        threading.Thread(target=_run, daemon=True).start()
 
     def _show_update_notes(self, info) -> None:
         """Fill and reveal the release notes box."""
