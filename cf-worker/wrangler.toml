@@ -1,0 +1,10 @@
+name = "lolcustomrpc-stats"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# KV namespace for storing install/heartbeat data.
+# Create it with: npx wrangler kv namespace create STATS_KV
+# Then paste the returned "id" below.
+[[kv_namespaces]]
+binding = "STATS_KV"
+id = "23d91c13a7f7450bac0ce39a06d49b0c"
