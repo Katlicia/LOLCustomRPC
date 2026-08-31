@@ -259,6 +259,14 @@ class SettingsWindow(ctk.CTk):
             text_color=MUTED2,
         ).pack(side="left", padx=20, pady=12)
 
+        self._stats_label = ctk.CTkLabel(
+            ft, text="",
+            font=ctk.CTkFont(family=FONT_UI, size=15),
+            text_color=MUTED,
+        )
+        self._stats_label.place(relx=0.5, rely=0.5, anchor="center")
+        self._fetch_usage_stats()
+
         bf = ctk.CTkFrame(ft, fg_color="transparent")
         bf.pack(side="right", padx=20, pady=12)
 
@@ -666,6 +674,26 @@ class SettingsWindow(ctk.CTk):
         ).pack(pady=(0, 16))
 
         return panel
+
+    def _fetch_usage_stats(self) -> None:
+        """Fetch live user count + total installs in the background (best-effort)."""
+        import threading
+        from services.stats import fetch_stats
+
+        def _run():
+            data = fetch_stats()
+            if not data:
+                return
+
+            def _show():
+                online = data.get("online", 0)
+                total = data.get("total_installs", 0)
+                self._stats_label.configure(
+                    text=f"Active Users: {online:,} Total Downloads: {total:,}"
+                )
+            self.after(0, _show)
+
+        threading.Thread(target=_run, daemon=True).start()
 
     def _show_update_notes(self, info) -> None:
         """Fill and reveal the release notes box."""

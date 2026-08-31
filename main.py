@@ -26,6 +26,7 @@ from i18n.translator import Translator
 from services.config import ConfigManager
 from services import autostart
 from services.updater import check_async
+from services import stats
 from ui.tray import TrayIcon
 from ui.settings_window import SettingsWindow
 
@@ -58,6 +59,22 @@ def setup_logging():
     )
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
+
+
+# Anonymous usage stats loop (background thread)
+def stats_loop(version: str, stop_event: threading.Event):
+    """
+    Sends a one-time install ping, then a heartbeat every HEARTBEAT_INTERVAL
+    while the app is running. Entirely best-effort — see services/stats.py.
+    """
+    logger = logging.getLogger("stats_loop")
+    device_id = stats.get_or_create_device_id()
+    stats.send_install(device_id, version)
+    stats.send_heartbeat(device_id, version)  # count as "online" immediately, not after the first interval
+
+    while not stop_event.wait(timeout=stats.HEARTBEAT_INTERVAL):
+        stats.send_heartbeat(device_id, version)
+    logger.debug("Stats loop stopped.")
 
 
 # RPC loop (background thread)
@@ -216,6 +233,14 @@ def main():
         daemon=True,
     )
     rpc_thread.start()
+
+    # Anonymous usage stats (install + heartbeat) in its own background thread
+    stats_thread = threading.Thread(
+        target=stats_loop,
+        args=(APP_VERSION, stop_event),
+        daemon=True,
+    )
+    stats_thread.start()
 
     # Settings window — Tkinter must live on the main thread
     win = SettingsWindow(
