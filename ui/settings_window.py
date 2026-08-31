@@ -689,7 +689,7 @@ class SettingsWindow(ctk.CTk):
                 online = data.get("online", 0)
                 total = data.get("total_installs", 0)
                 self._stats_label.configure(
-                    text=f"Active Users: {online:,} Total Downloads: {total:,}"
+                    text=f"Active Users: {online:,} | Total Downloads: {total:,}"
                 )
             self.after(0, _show)
 
