@@ -95,6 +95,10 @@ The output will be at `dist/LoLCustomRPC.exe`.
 
 Click the bug icon in the top-right corner of the app, or open an issue directly at [GitHub Issues](https://github.com/Katlicia/LOLCustomRPC/issues/new).
 
+## Anonymous Usage Stats
+
+The app sends a random, locally-generated device id (a UUID, not tied to your identity in any way) to a small backend so the app can show a live "people using this right now" and total install count. No personal data, LoL account info, or gameplay data is ever collected or sent — see [cf-worker/](cf-worker/) for the full source of the stats backend.
+
 ## License
 
 [MIT](LICENSE)
