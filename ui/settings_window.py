@@ -675,25 +675,37 @@ class SettingsWindow(ctk.CTk):
 
         return panel
 
+    STATS_REFRESH_INTERVAL_MS = 60_000  # re-check every 60s so numbers stay live
+
     def _fetch_usage_stats(self) -> None:
-        """Fetch live user count + total installs in the background (best-effort)."""
+        """
+        Fetch live user count + total installs in the background (best-effort).
+        Reschedules itself every STATS_REFRESH_INTERVAL_MS for as long as the
+        app is running — it just skips the actual network call while the
+        window is hidden (withdrawn to tray), so numbers are fresh again the
+        moment the window is shown.
+        """
         import threading
         from services.stats import fetch_stats
 
-        def _run():
-            data = fetch_stats()
-            if not data:
-                return
+        if self.winfo_viewable():
+            def _run():
+                data = fetch_stats()
+                if not data:
+                    return
 
-            def _show():
-                online = data.get("online", 0)
-                total = data.get("total_installs", 0)
-                self._stats_label.configure(
-                    text=f"Active Users: {online:,} | Total Downloads: {total:,}"
-                )
-            self.after(0, _show)
+                def _show():
+                    online = data.get("online", 0)
+                    total = data.get("total_installs", 0)
+                    self._stats_label.configure(
+                        text=f"Active Users: {online:,} | Total Downloads: {total:,}"
+                    )
+                self.after(0, _show)
 
-        threading.Thread(target=_run, daemon=True).start()
+            threading.Thread(target=_run, daemon=True).start()
+
+        self.after(self.STATS_REFRESH_INTERVAL_MS, self._fetch_usage_stats)
+        self.after(self.STATS_REFRESH_INTERVAL_MS, self._fetch_usage_stats)
 
     def _show_update_notes(self, info) -> None:
         """Fill and reveal the release notes box."""
