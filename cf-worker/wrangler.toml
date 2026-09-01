@@ -2,9 +2,20 @@ name = "lolcustomrpc-stats"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# KV namespace for storing install/heartbeat data.
+# KV namespace for storing install counts (get/put only — no list() calls,
+# so it stays well under the free tier's list-operation quota).
 # Create it with: npx wrangler kv namespace create STATS_KV
 # Then paste the returned "id" below.
 [[kv_namespaces]]
 binding = "STATS_KV"
 id = "23d91c13a7f7450bac0ce39a06d49b0c"
+
+# Durable Object holding the live "online right now" count in memory.
+# See src/index.js (OnlineCounter class) for why this replaced KV list().
+[[durable_objects.bindings]]
+name = "ONLINE_COUNTER"
+class_name = "OnlineCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["OnlineCounter"]
