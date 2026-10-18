@@ -20,7 +20,7 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from core.rpc_manager import RPCManager
-from core.state_machine import StateMachine, State, DisplayOptions
+from core.state_machine import StateMachine, State
 from core.ddragon import DDragon
 from i18n.translator import Translator
 from services.config import ConfigManager
@@ -173,18 +173,8 @@ def main():
     # Core components
     ddragon    = DDragon()
     translator = Translator(locale=config.get("general.language", "auto"))
-    sm = StateMachine(
-        ddragon, translator,
-        options=DisplayOptions(
-            show_nick=config.get("display.show_nick", True),
-            show_tag=config.get("display.show_tag",  True),
-            show_rank=config.get("display.show_rank", True),
-            show_level=config.get("display.show_level", True),
-            show_kda=config.get("display.show_kda", True),
-            show_role=config.get("display.show_role", True),
-            logo=config.get("display.logo", "lol_logo"),
-        ),
-    )
+    sm = StateMachine(ddragon, translator)
+    sm.apply_config(config)  # single source of truth for display options
 
     rpc = RPCManager(CLIENT_ID)
     rpc.connect()
